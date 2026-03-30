@@ -64,15 +64,16 @@
 <body>
 
     <div class="player-container">
-        <!-- LYRICS MODAL OVERLAY -->
+        <!-- LYRICS MODAL -->
         <div id="lyricsModal">
-            <button onclick="document.getElementById('lyricsModal').style.display='none'" style="align-self: flex-end; background: red; color: white; border: none; padding: 5px 15px; border-radius: 5px; font-weight: bold;">X Close</button>
+            <button onclick="document.getElementById('lyricsModal').style.display='none'" style="align-self: flex-end; background: red; color: white; border: none; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer;">X Close</button>
             <h3 style="color:#00ff88; margin-top:10px;">Lyrics</h3>
             <div id="lyricsText">Loading lyrics...</div>
         </div>
 
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search song...">
+            <!-- 🚨 KEYBOARD ENTER FIX HERE 🚨 -->
+            <input type="text" id="searchInput" placeholder="Search song..." onkeypress="handleEnter(event)">
             <button id="searchBtnUI" onclick="searchAll()">Search</button>
         </div>
 
@@ -115,13 +116,11 @@
         <p id="statusMessage" style="color: #00bfff; font-size: 0.8em; margin-top: 10px;"></p>
     </div>
 
-    <!-- TABS CONTENT -->
     <div class="list-container active" id="list-saavn"></div>
     <div class="list-container" id="list-yt"></div>
     <div class="list-container" id="list-fav"></div>
     <div class="list-container" id="list-off"></div>
     
-    <!-- Settings Tab -->
     <div class="list-container" id="list-set">
         <div class="settings-card">
             <h3 id="langTitleUI">🌍 App Language</h3>
@@ -132,7 +131,7 @@
         </div>
         <div class="settings-card">
             <h3 id="storageTitleUI">🗑️ Storage</h3>
-            <button onclick="clearAppCache()" style="width:100%; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:5px;">Clear App Data</button>
+            <button onclick="clearAppCache()" style="width:100%; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:5px; cursor: pointer;">Clear App Data</button>
         </div>
     </div>
 
@@ -151,14 +150,27 @@
 
         const MY_SERVER_URL = "https://cnmw.onrender.com";
 
-        // Global Queues for Autoplay
+        // 🚨 SAFE DB PARSE TO PREVENT CRASHES 🚨
+        function getSafeDB(key) {
+            try { return JSON.parse(localStorage.getItem(key)) || []; } 
+            catch(e) { return []; }
+        }
+
         let saavnResults = [];
-        let favorites = JSON.parse(localStorage.getItem('cnmw_favs')) || [];
-        let offlineDb = JSON.parse(localStorage.getItem('cnmw_offline')) || [];
+        let favorites = getSafeDB('cnmw_favs');
+        let offlineDb = getSafeDB('cnmw_offline');
         
         let currentQueue = [];
         let currentIndex = 0;
         let currentTrack = null;
+
+        // --- KEYBOARD ENTER FIX ---
+        function handleEnter(e) {
+            if (e.key === 'Enter') {
+                searchAll();
+                document.getElementById('searchInput').blur(); // Hides keyboard automatically!
+            }
+        }
 
         // --- MULTI-LANGUAGE ENGINE ---
         const i18n = {
@@ -178,7 +190,6 @@
             localStorage.setItem('cnmw_lang', lang);
         }
         
-        // Load saved language on startup
         let savedLang = localStorage.getItem('cnmw_lang') || 'en';
         document.getElementById('langSelect').value = savedLang;
         changeLang(savedLang);
@@ -209,7 +220,7 @@
                 let songs = json.data?.results || json.data || json.results || [];
 
                 if (songs.length > 0) {
-                    saavnResults = []; // Clear queue
+                    saavnResults = []; 
                     container.innerHTML = "";
                     songs.forEach((song, index) => {
                         let sTitle = song.name || song.title || "Unknown";
@@ -240,7 +251,7 @@
                     });
                     statusMsg.innerText = "Queue Ready!";
                 } else container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>No songs found.</p>";
-            } catch (err) { container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>Error loading.</p>"; }
+            } catch (err) { container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>Backend waking up... Try again in 30s.</p>"; }
         }
 
         // --- QUEUE & AUTOPLAY LOGIC ---
@@ -256,7 +267,6 @@
             currentIndex = index;
             let song = list[index];
 
-            // Highlight playing song
             document.querySelectorAll('.result-item').forEach(el => el.classList.remove('playing-now'));
             let activeEl = document.getElementById(`item-${context}-${index}`);
             if(activeEl) activeEl.classList.add('playing-now');
@@ -278,14 +288,11 @@
             }
         }
 
-        audio.addEventListener('ended', () => {
-            if (!audio.loop) playNext(); // The Magic Autoplay Engine!
-        });
+        audio.addEventListener('ended', () => { if (!audio.loop) playNext(); });
 
         // --- LYRICS ENGINE ---
         async function fetchLyrics() {
             if(!currentTrack) return statusMsg.innerText = "Play a song first!";
-            if(currentTrack.url.startsWith('YT:')) return statusMsg.innerText = "Lyrics only for Saavn songs!";
             
             const modal = document.getElementById('lyricsModal');
             const textEl = document.getElementById('lyricsText');
@@ -293,7 +300,6 @@
             textEl.innerText = "Extracting lyrics from server... ⏳";
 
             try {
-                // Using Saavn unofficial API for lyrics
                 const response = await fetch(`https://saavn.me/lyrics?id=${currentTrack.id}`);
                 const data = await response.json();
                 
@@ -316,7 +322,7 @@
         function startAudio() { 
             audio.play().then(() => { 
                 playBtn.innerText = "⏸"; 
-                visualizer.classList.add('active'); // Start Visualizer
+                visualizer.classList.add('active'); 
             }).catch(() => { playBtn.innerText = "▶️"; }); 
         }
         
@@ -354,6 +360,4 @@
 
         function loadFavorites() {
             const container = document.getElementById('list-fav');
-            container.innerHTML = "";
-            if(favorites.length === 0) return;
-            favorites.forEach((s
+ 
