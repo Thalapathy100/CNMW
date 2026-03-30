@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CNMW - Ultimate Backend Edition</title>
+    <title>CNMW - The Ultimate Player</title>
     <style>
         body { 
             background-color: #0f0f13; color: #ffffff; 
@@ -28,7 +28,7 @@
         }
         
         .tabs { display: flex; width: 100%; background: #2d2d3d; border-radius: 10px; overflow: hidden; margin-bottom: 15px; }
-        .tab { flex: 1; padding: 10px 5px; text-align: center; cursor: pointer; font-size: 0.8em; font-weight: bold; color: #8888a0; transition: 0.3s; }
+        .tab { flex: 1; padding: 10px 2px; text-align: center; cursor: pointer; font-size: 0.8em; font-weight: bold; color: #8888a0; transition: 0.3s; }
         .tab.active { background: #00bfff; color: white; }
 
         .album-art { 
@@ -46,10 +46,7 @@
         }
         
         .controls { display: flex; justify-content: center; align-items: center; gap: 20px; }
-        .controls button { 
-            background: none; border: none; color: #00bfff; 
-            font-size: 25px; cursor: pointer; transition: 0.2s;
-        }
+        .controls button { background: none; border: none; color: #00bfff; font-size: 25px; cursor: pointer; transition: 0.2s; }
         #playBtn { font-size: 45px; }
         .controls button:active { transform: scale(0.9); color: white; }
 
@@ -81,14 +78,15 @@
         </div>
 
         <div class="tabs">
-            <div class="tab active" id="tab-saavn" onclick="switchTab('saavn')">🎵 CNMW Server</div>
+            <div class="tab active" id="tab-saavn" onclick="switchTab('saavn')">🎵 Saavn</div>
             <div class="tab" id="tab-yt" onclick="switchTab('yt')">🎥 YouTube</div>
+            <div class="tab" id="tab-fav" onclick="switchTab('fav'); loadFavorites();">❤️ Favs</div>
         </div>
 
-        <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=600&auto=format&fit=crop" alt="Album Cover" class="album-art" id="cover">
+        <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=600&auto=format&fit=crop" id="cover" class="album-art">
         
-        <div class="song-title" id="title">CNMW Connected!</div>
-        <div class="artist-name" id="artist">Server Online 🟢</div>
+        <div class="song-title" id="title">CNMW Player</div>
+        <div class="artist-name" id="artist">Pick a song!</div>
         
         <audio id="audio"></audio>
 
@@ -108,6 +106,7 @@
 
     <div class="list-container active" id="list-saavn"></div>
     <div class="list-container" id="list-yt"></div>
+    <div class="list-container" id="list-fav"></div> <!-- Favorites List -->
 
     <script>
         const audio = document.getElementById('audio');
@@ -121,11 +120,14 @@
         const currentTimeEl = document.getElementById('currentTime');
         const totalTimeEl = document.getElementById('totalTime');
 
-        // 🔥 YOUR VERY OWN BACKEND SERVER 🔥
+        // 🔥 NEE SONTHA BACKEND URL 🔥
         const MY_SERVER_URL = "https://cnmw.onrender.com";
 
+        // PLAYLIST/FAVORITES LOGIC (Browser Memory)
+        let favorites = JSON.parse(localStorage.getItem('cnmw_favs')) || [];
+
         function switchTab(platform) {
-            ['saavn', 'yt'].forEach(p => {
+            ['saavn', 'yt', 'fav'].forEach(p => {
                 document.getElementById(`tab-${p}`).className = platform === p ? 'tab active' : 'tab';
                 document.getElementById(`list-${p}`).className = platform === p ? 'list-container active' : 'list-container';
             });
@@ -137,81 +139,180 @@
             return txt.value;
         }
 
+        function isFav(id) {
+            return favorites.some(song => song.id === id);
+        }
+
         function searchAll() {
             const query = document.getElementById('searchInput').value;
             if(!query) return;
 
-            statusMsg.innerText = "Calling CNMW Backend... 🚀";
-            fetchFromMyServer(query);
-            // We will add YouTube to the backend later once Saavn is perfectly bypassed!
-            document.getElementById('list-yt').innerHTML = "<p style='text-align:center; color:gray;'>YouTube module routing to backend soon...</p>";
+            statusMsg.innerText = "Searching on CNMW Backend... 🚀";
+            switchTab('saavn');
+            fetchSaavn(query);
+            fetchYT(query);
         }
 
-        async function fetchFromMyServer(query) {
+        // --- FETCH SAAVN VIA BACKEND ---
+        async function fetchSaavn(query) {
             const container = document.getElementById('list-saavn');
-            container.innerHTML = "<p style='text-align:center;'>Bypassing ISP with private server...</p>";
+            container.innerHTML = "<p style='text-align:center;'>Fetching HQ Music...</p>";
             
             try {
-                // Requesting YOUR server instead of Saavn directly!
                 const response = await fetch(`${MY_SERVER_URL}/api/saavn?q=${encodeURIComponent(query)}`);
-                
-                if (!response.ok) throw new Error("Server responded with error");
-                
                 const json = await response.json();
                 let songs = json.data?.results || json.data || json.results || [];
 
                 if (songs.length > 0) {
                     container.innerHTML = "";
                     songs.forEach(song => {
-                        let songTitle = decodeHTML(song.name || song.title || "Unknown");
-                        let songArtist = decodeHTML(song.primaryArtists || song.singers || "Unknown");
-                        let songThumb = "https://via.placeholder.com/50";
-                        if (song.image) songThumb = Array.isArray(song.image) ? song.image[song.image.length - 1].link || song.image[song.image.length - 1].url : song.image;
-                        
-                        let audioUrl = "";
+                        let sTitle = decodeHTML(song.name || song.title || "Unknown");
+                        let sArtist = decodeHTML(song.primaryArtists || song.singers || "Unknown");
+                        let sThumb = song.image ? (Array.isArray(song.image) ? song.image[song.image.length-1].link || song.image[song.image.length-1].url : song.image) : "https://via.placeholder.com/50";
                         let dl = song.downloadUrl || song.media_url;
-                        if (dl) audioUrl = Array.isArray(dl) ? dl[dl.length - 1].link || dl[dl.length - 1].url : dl;
+                        let sUrl = dl ? (Array.isArray(dl) ? dl[dl.length-1].link || dl[dl.length-1].url : dl) : "";
+                        let sId = song.id || sTitle;
 
-                        if (!audioUrl) return;
+                        if (!sUrl) return;
+
+                        let heart = isFav(sId) ? '❤️' : '🤍';
+                        let likedClass = isFav(sId) ? 'liked' : '';
 
                         const item = document.createElement('div');
                         item.className = 'result-item';
                         item.innerHTML = `
-                            <img src="${songThumb}" class="result-thumb" onclick="playAudio('${audioUrl}', '${songTitle.replace(/'/g, "\\'")}', '${songArtist.replace(/'/g, "\\'")}', '${songThumb}')">
-                            <div class="result-info" onclick="playAudio('${audioUrl}', '${songTitle.replace(/'/g, "\\'")}', '${songArtist.replace(/'/g, "\\'")}', '${songThumb}')">
-                                <span class="result-title">${songTitle}</span>
-                                <span class="result-artist">${songArtist}</span>
+                            <img src="${sThumb}" class="result-thumb" onclick="playAudio('${sUrl}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${sThumb}')">
+                            <div class="result-info" onclick="playAudio('${sUrl}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${sThumb}')">
+                                <span class="result-title">${sTitle}</span>
+                                <span class="result-artist">${sArtist}</span>
                                 <span class="source-badge" style="color:#00ff88;">🎵 CNMW Secure</span>
                             </div>
-                            <button class="like-btn" onclick="toggleLike(this, '${songTitle}')">🤍</button>
+                            <button class="like-btn ${likedClass}" onclick="toggleLike(this, '${sId}', '${sUrl}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${sThumb}')">${heart}</button>
                         `;
                         container.appendChild(item);
                     });
-                    statusMsg.innerText = "ISP Bypassed! Select a song.";
+                    statusMsg.innerText = "Results arrived!";
                 } else {
                     container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>No songs found.</p>";
                 }
             } catch (err) {
-                console.error(err);
-                container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>Backend waking up (takes 30s for the first time on free tier). Try again!</p>";
+                container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>Error loading Saavn.</p>";
             }
         }
 
-        function toggleLike(btn, songName) {
+        // --- FETCH YOUTUBE VIA BACKEND ---
+        async function fetchYT(query) {
+            const container = document.getElementById('list-yt');
+            container.innerHTML = "<p style='text-align:center;'>Bypassing ISP for YT...</p>";
+            
+            try {
+                const response = await fetch(`${MY_SERVER_URL}/api/yt?q=${encodeURIComponent(query)}`);
+                const data = await response.json();
+                
+                if (data.items && data.items.length > 0) {
+                    container.innerHTML = "";
+                    const streams = data.items.filter(item => item.type === 'stream').slice(0, 15);
+                    
+                    streams.forEach(video => {
+                        const vidId = video.url.split('?v=')[1]; 
+                        const thumb = video.thumbnail || "https://via.placeholder.com/50";
+                        let sTitle = video.title;
+                        let sArtist = video.uploaderName;
+                        let sServer = data.server;
+
+                        let heart = isFav(vidId) ? '❤️' : '🤍';
+                        let likedClass = isFav(vidId) ? 'liked' : '';
+
+                        const item = document.createElement('div');
+                        item.className = 'result-item';
+                        item.innerHTML = `
+                            <img src="${thumb}" class="result-thumb" onclick="playYT('${vidId}', '${sServer}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${thumb}')">
+                            <div class="result-info" onclick="playYT('${vidId}', '${sServer}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${thumb}')">
+                                <span class="result-title">${sTitle}</span>
+                                <span class="result-artist">${sArtist}</span>
+                                <span class="source-badge" style="color:#ff4d4d;">🎥 YT Extractor</span>
+                            </div>
+                            <button class="like-btn ${likedClass}" onclick="toggleLike(this, '${vidId}', 'YT:${sServer}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${thumb}')">${heart}</button>
+                        `;
+                        container.appendChild(item);
+                    });
+                }
+            } catch (err) {
+                container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>YouTube blocked.</p>";
+            }
+        }
+
+        // --- FAVORITES LOGIC ---
+        function toggleLike(btn, id, url, title, artist, thumb) {
             btn.classList.toggle('liked');
             if(btn.classList.contains('liked')) {
                 btn.innerText = '❤️';
-                statusMsg.innerText = `Added to Favorites!`;
+                favorites.push({ id, url, title, artist, thumb });
+                statusMsg.innerText = `Saved to Favs!`;
             } else {
                 btn.innerText = '🤍';
-                statusMsg.innerText = `Removed from Favorites.`;
+                favorites = favorites.filter(song => song.id !== id);
+                statusMsg.innerText = `Removed from Favs.`;
+            }
+            localStorage.setItem('cnmw_favs', JSON.stringify(favorites));
+            if(document.getElementById('tab-fav').classList.contains('active')) {
+                loadFavorites(); // Refresh list if currently looking at Favs
             }
         }
 
+        function loadFavorites() {
+            const container = document.getElementById('list-fav');
+            container.innerHTML = "";
+            if(favorites.length === 0) {
+                container.innerHTML = "<p style='text-align:center; color:gray; margin-top:20px;'>Your favorite songs will appear here.</p>";
+                return;
+            }
+            
+            favorites.forEach(song => {
+                const isYT = song.url.startsWith('YT:');
+                const onClickLogic = isYT 
+                    ? `playYT('${song.id}', '${song.url.replace('YT:','')}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')`
+                    : `playAudio('${song.url}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')`;
+
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                item.innerHTML = `
+                    <img src="${song.thumb}" class="result-thumb" onclick="${onClickLogic}">
+                    <div class="result-info" onclick="${onClickLogic}">
+                        <span class="result-title">${song.title}</span>
+                        <span class="result-artist">${song.artist}</span>
+                        <span class="source-badge" style="color:#ffcc00;">⭐ Saved</span>
+                    </div>
+                    <button class="like-btn liked" onclick="toggleLike(this, '${song.id}', '${song.url}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')">❤️</button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // --- PLAYER LOGIC ---
         function playAudio(audioUrl, songTitle, songArtist, songThumb) {
-            updatePlayerUI(songTitle, songArtist, songThumb, "Playing Secure Audio... 🎵");
+            updatePlayerUI(songTitle, songArtist, songThumb, "Playing Audio... 🎵");
             audio.src = audioUrl;
             startAudio();
+        }
+
+        async function playYT(videoId, serverUrl, songTitle, songArtist, songThumb) {
+            updatePlayerUI(songTitle, songArtist, songThumb, "Extracting from Backend... 🎧");
+            try {
+                const response = await fetch(`${MY_SERVER_URL}/api/yt/stream?id=${videoId}&server=${encodeURIComponent(serverUrl)}`);
+                const data = await response.json();
+                
+                const audioStreams = data.audioStreams?.filter(a => a.format === 'M4A' || a.format === 'WEBM') || [];
+                if (audioStreams.length > 0) {
+                    audio.src = audioStreams[0].url;
+                    statusMsg.innerText = "Playing YT Stream...";
+                    startAudio();
+                } else {
+                    statusMsg.innerText = "No audio stream found.";
+                }
+            } catch (err) {
+                statusMsg.innerText = "Extraction failed.";
+            }
         }
 
         function updatePlayerUI(songTitle, songArtist, songThumb, msg) {
@@ -219,12 +320,8 @@
             artist.innerText = songArtist;
             cover.src = songThumb;
             statusMsg.innerText = msg;
-            
             if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({
-                    title: songTitle, artist: songArtist,
-                    artwork: [{ src: songThumb, sizes: '512x512', type: 'image/jpeg' }]
-                });
+                navigator.mediaSession.metadata = new MediaMetadata({ title: songTitle, artist: songArtist, artwork: [{ src: songThumb, sizes: '512x512', type: 'image/jpeg' }]});
                 navigator.mediaSession.setActionHandler('play', () => { audio.play(); playBtn.innerText = "⏸"; });
                 navigator.mediaSession.setActionHandler('pause', () => { audio.pause(); playBtn.innerText = "▶️"; });
             }
@@ -276,5 +373,4 @@
         });
     </script>
 </body>
-  </html>
-  
+</html>
