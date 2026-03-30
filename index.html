@@ -3,7 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CNMW - Bulletproof Premium</title>
+    <title>CNMW - Ultimate Premium</title>
+    
+    <!-- 🚨 HACKER CRASH DETECTOR 🚨 -->
+    <script>
+        window.onerror = function(msg, url, line) {
+            document.body.innerHTML = `
+            <div style="text-align:center; padding:40px; color:white; font-family:sans-serif; background:#0f0f13; height:100vh;">
+                <h1 style="color:#ff4d4d;">App Crashed 💥</h1>
+                <p style="color:#888;">Nee patha data valla error vachindi.</p>
+                <p style="color:#ff4d4d; font-size:12px; background:#000; padding:10px;">Error: ${msg} (Line: ${line})</p>
+                <button onclick="localStorage.clear(); alert('Fix aipoyindi! Reloading...'); location.reload();" style="padding:15px; background:#00bfff; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; margin-top:20px;">Auto-Fix & Restart</button>
+            </div>`;
+            return true;
+        };
+    </script>
+
     <style>
         body { background-color: #0f0f13; color: #ffffff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px 0; min-height: 100vh; }
         .player-container { background: #1a1a24; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 191, 255, 0.15); width: 90%; max-width: 350px; text-align: center; border: 1px solid #2d2d3d; margin-bottom: 20px; position: relative;}
@@ -19,7 +34,6 @@
 
         .album-art { width: 100%; height: 250px; background: #252535; border-radius: 15px; margin-bottom: 10px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         
-        /* TRENDY VISUALIZER */
         .visualizer { display: flex; gap: 5px; justify-content: center; align-items: flex-end; height: 30px; margin-bottom: 15px; opacity: 0; transition: 0.3s; }
         .visualizer.active { opacity: 1; }
         .bar { width: 6px; background: #00ff88; border-radius: 3px; animation: bounce 0.5s infinite alternate; }
@@ -53,23 +67,15 @@
         .icon-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 0 5px; color: #888; transition: 0.3s; }
         .icon-btn.liked { color: #ff0055; transform: scale(1.1); }
 
-        /* LYRICS MODAL */
         #lyricsModal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,15,19,0.95); border-radius: 20px; z-index: 100; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; border: 1px solid #00bfff;}
         #lyricsText { width: 100%; flex: 1; overflow-y: auto; color: #ccc; text-align: center; white-space: pre-line; line-height: 1.8; font-size: 0.9em; margin-top: 15px;}
-        
         .settings-card { background: #1a1a24; padding: 15px; border-radius: 10px; border: 1px solid #2d2d3d; margin-bottom: 10px; }
         .settings-card h3 { margin-top: 0; color: #00bfff; font-size: 1em; }
-
-        /* SECRET DEBUG LOG */
-        #debugLog { display: none; color: #ff4d4d; font-size: 11px; background: #000; padding: 10px; border-radius: 5px; margin-top: 10px; width: 90%; max-width: 350px; word-wrap: break-word; border: 1px solid red; }
     </style>
 </head>
 <body>
 
-    <div id="debugLog"><strong>Developer Logs:</strong></div>
-
     <div class="player-container">
-        <!-- LYRICS MODAL -->
         <div id="lyricsModal">
             <button onclick="document.getElementById('lyricsModal').style.display='none'" style="align-self: flex-end; background: red; color: white; border: none; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer;">X Close</button>
             <h3 style="color:#00ff88; margin-top:10px;">Lyrics</h3>
@@ -139,12 +145,11 @@
     </div>
 
     <script>
-        // HACKER DEBUGGER: Catches any invisible errors and shows them on screen!
-        window.onerror = function(msg, url, line) {
-            const dbg = document.getElementById('debugLog');
-            dbg.style.display = 'block';
-            dbg.innerHTML += `<br>[Line ${line}]: ${msg}`;
-        };
+        // AUTO CLEANER: Runs once to ensure no corrupted data from old versions breaks the app!
+        if (!localStorage.getItem('cnmw_v4_fixed')) {
+            localStorage.clear();
+            localStorage.setItem('cnmw_v4_fixed', 'true');
+        }
 
         const audio = document.getElementById('audio');
         const playBtn = document.getElementById('playBtn');
@@ -160,7 +165,6 @@
 
         const MY_SERVER_URL = "https://cnmw.onrender.com";
 
-        // 🚨 BULLETPROOF DATABASE 🚨
         function getSafeDB(key) {
             try { 
                 let data = JSON.parse(localStorage.getItem(key));
@@ -169,20 +173,19 @@
         }
 
         let saavnResults = [];
-        let favorites = [];
-        let offlineDb = [];
+        let favorites = getSafeDB('cnmw_favs');
+        let offlineDb = getSafeDB('cnmw_offline');
         let currentQueue = [];
         let currentIndex = 0;
         let currentTrack = null;
 
-        // MULTI-LANGUAGE ENGINE
         const i18n = {
             en: { search: "Search", t1: "🎵 Saavn", t2: "🎥 YT", t3: "❤️ Favs", t4: "📥 Offline", t5: "⚙️ Settings", lang: "🌍 App Language", store: "🗑️ Storage" },
             te: { search: "వెతకండి", t1: "🎵 సావన్", t2: "🎥 యూట్యూబ్", t3: "❤️ ఇష్టమైనవి", t4: "📥 ఆఫ్‌లైన్", t5: "⚙️ సెట్టింగ్స్", lang: "🌍 యాప్ భాష", store: "🗑️ స్టోరేజ్ క్లియర్" }
         };
 
         function changeLang(lang) {
-            if(!i18n[lang]) lang = 'en'; // Safe fallback
+            if(!i18n[lang]) lang = 'en'; 
             document.getElementById('searchBtnUI').innerText = i18n[lang].search;
             document.getElementById('tab-saavn').innerText = i18n[lang].t1;
             document.getElementById('tab-yt').innerText = i18n[lang].t2;
@@ -194,31 +197,12 @@
             localStorage.setItem('cnmw_lang', lang);
         }
 
-        // --- APP INITIALIZER (Self-Healing) ---
-        window.onload = () => {
-            try {
-                favorites = getSafeDB('cnmw_favs');
-                offlineDb = getSafeDB('cnmw_offline');
-                
-                let savedLang = localStorage.getItem('cnmw_lang');
-                if (!i18n[savedLang]) savedLang = 'en';
-                document.getElementById('langSelect').value = savedLang;
-                changeLang(savedLang);
-
-                loadFavorites(); 
-                loadOffline();
-            } catch (e) {
-                console.error("App Corrupted. Healing...", e);
-                localStorage.clear(); // Wipes poisoned cache
-                favorites = []; offlineDb = [];
-            }
-        };
+        let savedLang = localStorage.getItem('cnmw_lang') || 'en';
+        document.getElementById('langSelect').value = savedLang;
+        changeLang(savedLang);
 
         function handleEnter(e) {
-            if (e.key === 'Enter') {
-                searchAll();
-                document.getElementById('searchInput').blur(); 
-            }
+            if (e.key === 'Enter') { searchAll(); document.getElementById('searchInput').blur(); }
         }
 
         function switchTab(platform) {
@@ -262,34 +246,28 @@
 
                         let heart = isFav(sId) ? '❤️' : '🤍';
                         let likedClass = isFav(sId) ? 'liked' : '';
-                        let cleanTitle = sTitle.replace(/'/g, "\\'");
-                        let cleanArtist = sArtist.replace(/'/g, "\\'");
+                        let safeTitle = sTitle.replace(/'/g, "\\'").replace(/"/g, "&quot;");
+                        let safeArtist = sArtist.replace(/'/g, "\\'").replace(/"/g, "&quot;");
 
                         const item = document.createElement('div');
-                        item.className = 'result-item';
-                        item.id = `item-saavn-${index}`;
+                        item.className = 'result-item'; item.id = `item-saavn-${index}`;
                         item.innerHTML = `
                             <img src="${sThumb}" class="result-thumb" onclick="playFromQueue(${index}, 'saavn')">
                             <div class="result-info" onclick="playFromQueue(${index}, 'saavn')">
-                                <span class="result-title">${sTitle}</span>
-                                <span class="result-artist">${sArtist}</span>
+                                <span class="result-title">${sTitle}</span><span class="result-artist">${sArtist}</span>
                             </div>
-                            <button class="icon-btn ${likedClass}" onclick="toggleLike(this, '${sId}', '${sUrl}', '${cleanTitle}', '${cleanArtist}', '${sThumb}')">${heart}</button>
+                            <button class="icon-btn ${likedClass}" onclick="toggleLike(this, '${sId}', '${sUrl}', '${safeTitle}', '${safeArtist}', '${sThumb}')">${heart}</button>
                         `;
                         container.appendChild(item);
                     });
                     statusMsg.innerText = "Queue Ready!";
                 } else container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>No songs found.</p>";
-            } catch (err) { 
-                container.innerHTML = `<p style='color:#ff4d4d; text-align:center;'>Failed to fetch.</p>`; 
-            }
+            } catch (err) { container.innerHTML = `<p style='color:#ff4d4d; text-align:center;'>Failed to fetch.</p>`; }
         }
 
-        // QUEUE & AUTOPLAY
         function playFromQueue(index, context) {
             let list = context === 'saavn' ? saavnResults : context === 'fav' ? favorites : offlineDb;
             if(list.length === 0 || !list[index]) return;
-            
             currentQueue = list; currentIndex = index; let song = list[index];
 
             document.querySelectorAll('.result-item').forEach(el => el.classList.remove('playing-now'));
@@ -300,17 +278,12 @@
         }
 
         function playNext() {
-            if (currentIndex < currentQueue.length - 1) {
-                let context = currentQueue === saavnResults ? 'saavn' : currentQueue === favorites ? 'fav' : 'off';
-                playFromQueue(currentIndex + 1, context);
-            } else { statusMsg.innerText = "Queue Ended 🛑"; }
+            if (currentIndex < currentQueue.length - 1) playFromQueue(currentIndex + 1, currentQueue === saavnResults ? 'saavn' : currentQueue === favorites ? 'fav' : 'off');
+            else statusMsg.innerText = "Queue Ended 🛑";
         }
 
         function playPrev() {
-            if (currentIndex > 0) {
-                let context = currentQueue === saavnResults ? 'saavn' : currentQueue === favorites ? 'fav' : 'off';
-                playFromQueue(currentIndex - 1, context);
-            }
+            if (currentIndex > 0) playFromQueue(currentIndex - 1, currentQueue === saavnResults ? 'saavn' : currentQueue === favorites ? 'fav' : 'off');
         }
 
         audio.addEventListener('ended', () => { if (!audio.loop) playNext(); });
@@ -344,4 +317,13 @@
                 let min = Math.floor(audio.currentTime / 60); let sec = Math.floor(audio.currentTime % 60);
                 currentTimeEl.innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
                 let tMin = Math.floor(audio.duration / 60); let tSec = Math.floor(audio.duration % 60);
-                if(!isNaN(tMin)) totalTimeEl.innerText = `${tMin}:${tSec < 10 ? '0' : ''}$
+                if(!isNaN(tMin)) totalTimeEl.innerText = `${tMin}:${tSec < 10 ? '0' : ''}${tSec}`;
+            }
+        });
+
+        progressBar.addEventListener('input', () => { if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration; });
+
+        function toggleLike(btn, id, url, sTitle, sArtist, thumb) {
+            btn.classList.toggle('liked');
+            if(btn.classList.contains('liked')) { btn.innerText = '❤️'; favorites.push({ id, url, title: sTitle, artist: sArtist, thumb }); } 
+            else { btn.inne
