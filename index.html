@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CNMW - Ultimate Backend Edition</title>
+    <style>
+        body { 
+            background-color: #0f0f13; color: #ffffff; 
+            font-family: 'Segoe UI', sans-serif; 
+            display: flex; flex-direction: column; align-items: center; 
+            margin: 0; padding: 20px 0; min-height: 100vh;
+        }
+        .player-container { 
+            background: #1a1a24; padding: 25px; border-radius: 20px; 
+            box-shadow: 0 10px 30px rgba(0, 191, 255, 0.15); 
+            width: 90%; max-width: 350px; text-align: center; 
+            border: 1px solid #2d2d3d; margin-bottom: 20px;
+        }
+        .search-box { display: flex; gap: 10px; margin-bottom: 15px; }
+        .search-box input {
+            flex: 1; padding: 10px; border-radius: 10px; border: none;
+            background: #2d2d3d; color: white; outline: none;
+        }
+        .search-box button {
+            padding: 10px 15px; border-radius: 10px; border: none;
+            background: #00bfff; color: white; font-weight: bold; cursor: pointer;
+        }
+        
+        .tabs { display: flex; width: 100%; background: #2d2d3d; border-radius: 10px; overflow: hidden; margin-bottom: 15px; }
+        .tab { flex: 1; padding: 10px 5px; text-align: center; cursor: pointer; font-size: 0.8em; font-weight: bold; color: #8888a0; transition: 0.3s; }
+        .tab.active { background: #00bfff; color: white; }
+
+        .album-art { 
+            width: 100%; height: 250px; background: #252535; 
+            border-radius: 15px; margin-bottom: 15px; object-fit: cover;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .song-title { font-size: 1.2em; font-weight: bold; color: #00bfff; margin-bottom: 5px; }
+        .artist-name { font-size: 0.9em; color: #8888a0; margin-bottom: 15px; }
+        
+        .progress-container { display: flex; align-items: center; gap: 10px; font-size: 0.8em; color: #8888a0; margin-bottom: 15px; }
+        input[type="range"] { 
+            flex: 1; accent-color: #00bfff; height: 4px; background: #333; 
+            border-radius: 5px; outline: none; cursor: pointer;
+        }
+        
+        .controls { display: flex; justify-content: center; align-items: center; gap: 20px; }
+        .controls button { 
+            background: none; border: none; color: #00bfff; 
+            font-size: 25px; cursor: pointer; transition: 0.2s;
+        }
+        #playBtn { font-size: 45px; }
+        .controls button:active { transform: scale(0.9); color: white; }
+
+        .list-container { display: none; width: 90%; max-width: 350px; text-align: left; }
+        .list-container.active { display: block; }
+        
+        .result-item {
+            background: #1a1a24; padding: 10px; border-radius: 10px; 
+            margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
+            cursor: pointer; border: 1px solid #2d2d3d; transition: 0.2s;
+        }
+        .result-item:hover { background: #252535; border-color: #00bfff; }
+        .result-thumb { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; }
+        .result-info { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
+        .result-title { font-size: 0.9em; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white;}
+        .result-artist { font-size: 0.75em; color: #8888a0; }
+        .source-badge { font-size: 0.6em; background: #333; padding: 2px 5px; border-radius: 3px; width: max-content; margin-top: 3px;}
+        
+        .like-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 0 5px; color: #555; transition: 0.3s; }
+        .like-btn.liked { color: #ff0055; transform: scale(1.1); }
+    </style>
+</head>
+<body>
+
+    <div class="player-container">
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search a song or BGM...">
+            <button onclick="searchAll()">Search</button>
+        </div>
+
+        <div class="tabs">
+            <div class="tab active" id="tab-saavn" onclick="switchTab('saavn')">🎵 CNMW Server</div>
+            <div class="tab" id="tab-yt" onclick="switchTab('yt')">🎥 YouTube</div>
+        </div>
+
+        <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=600&auto=format&fit=crop" alt="Album Cover" class="album-art" id="cover">
+        
+        <div class="song-title" id="title">CNMW Connected!</div>
+        <div class="artist-name" id="artist">Server Online 🟢</div>
+        
+        <audio id="audio"></audio>
+
+        <div class="progress-container">
+            <span id="currentTime">0:00</span>
+            <input type="range" id="progressBar" value="0" max="100">
+            <span id="totalTime">0:00</span>
+        </div>
+
+        <div class="controls">
+            <button onclick="toggleLoop()" id="loopBtn" style="color: gray;">🔁</button>
+            <button onclick="togglePlay()" id="playBtn">▶️</button>
+            <button onclick="downloadSong()" id="downBtn" title="Download">⬇️</button>
+        </div>
+        <p id="statusMessage" style="color: #00bfff; font-size: 0.8em; margin-top: 10px;"></p>
+    </div>
+
+    <div class="list-container active" id="list-saavn"></div>
+    <div class="list-container" id="list-yt"></div>
+
+    <script>
+        const audio = document.getElementById('audio');
+        const playBtn = document.getElementById('playBtn');
+        const loopBtn = document.getElementById('loopBtn');
+        const title = document.getElementById('title');
+        const artist = document.getElementById('artist');
+        const cover = document.getElementById('cover');
+        const statusMsg = document.getElementById('statusMessage');
+        const progressBar = document.getElementById('progressBar');
+        const currentTimeEl = document.getElementById('currentTime');
+        const totalTimeEl = document.getElementById('totalTime');
+
+        // 🔥 YOUR VERY OWN BACKEND SERVER 🔥
+        const MY_SERVER_URL = "https://cnmw.onrender.com";
+
+        function switchTab(platform) {
+            ['saavn', 'yt'].forEach(p => {
+                document.getElementById(`tab-${p}`).className = platform === p ? 'tab active' : 'tab';
+                document.getElementById(`list-${p}`).className = platform === p ? 'list-container active' : 'list-container';
+            });
+        }
+
+        function decodeHTML(html) {
+            const txt = document.createElement("textarea");
+            txt.innerHTML = html;
+            return txt.value;
+        }
+
+        function searchAll() {
+            const query = document.getElementById('searchInput').value;
+            if(!query) return;
+
+            statusMsg.innerText = "Calling CNMW Backend... 🚀";
+            fetchFromMyServer(query);
+            // We will add YouTube to the backend later once Saavn is perfectly bypassed!
+            document.getElementById('list-yt').innerHTML = "<p style='text-align:center; color:gray;'>YouTube module routing to backend soon...</p>";
+        }
+
+        async function fetchFromMyServer(query) {
+            const container = document.getElementById('list-saavn');
+            container.innerHTML = "<p style='text-align:center;'>Bypassing ISP with private server...</p>";
+            
+            try {
+                // Requesting YOUR server instead of Saavn directly!
+                const response = await fetch(`${MY_SERVER_URL}/api/saavn?q=${encodeURIComponent(query)}`);
+                
+                if (!response.ok) throw new Error("Server responded with error");
+                
+                const json = await response.json();
+                let songs = json.data?.results || json.data || json.results || [];
+
+                if (songs.length > 0) {
+                    container.innerHTML = "";
+                    songs.forEach(song => {
+                        let songTitle = decodeHTML(song.name || song.title || "Unknown");
+                        let songArtist = decodeHTML(song.primaryArtists || song.singers || "Unknown");
+                        let songThumb = "https://via.placeholder.com/50";
+                        if (song.image) songThumb = Array.isArray(song.image) ? song.image[song.image.length - 1].link || song.image[song.image.length - 1].url : song.image;
+                        
+                        let audioUrl = "";
+                        let dl = song.downloadUrl || song.media_url;
+                        if (dl) audioUrl = Array.isArray(dl) ? dl[dl.length - 1].link || dl[dl.length - 1].url : dl;
+
+                        if (!audioUrl) return;
+
+                        const item = document.createElement('div');
+                        item.className = 'result-item';
+                        item.innerHTML = `
+                            <img src="${songThumb}" class="result-thumb" onclick="playAudio('${audioUrl}', '${songTitle.replace(/'/g, "\\'")}', '${songArtist.replace(/'/g, "\\'")}', '${songThumb}')">
+                            <div class="result-info" onclick="playAudio('${audioUrl}', '${songTitle.replace(/'/g, "\\'")}', '${songArtist.replace(/'/g, "\\'")}', '${songThumb}')">
+                                <span class="result-title">${songTitle}</span>
+                                <span class="result-artist">${songArtist}</span>
+                                <span class="source-badge" style="color:#00ff88;">🎵 CNMW Secure</span>
+                            </div>
+                            <button class="like-btn" onclick="toggleLike(this, '${songTitle}')">🤍</button>
+                        `;
+                        container.appendChild(item);
+                    });
+                    statusMsg.innerText = "ISP Bypassed! Select a song.";
+                } else {
+                    container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>No songs found.</p>";
+                }
+            } catch (err) {
+                console.error(err);
+                container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>Backend waking up (takes 30s for the first time on free tier). Try again!</p>";
+            }
+        }
+
+        function toggleLike(btn, songName) {
+            btn.classList.toggle('liked');
+            if(btn.classList.contains('liked')) {
+                btn.innerText = '❤️';
+                statusMsg.innerText = `Added to Favorites!`;
+            } else {
+                btn.innerText = '🤍';
+                statusMsg.innerText = `Removed from Favorites.`;
+            }
+        }
+
+        function playAudio(audioUrl, songTitle, songArtist, songThumb) {
+            updatePlayerUI(songTitle, songArtist, songThumb, "Playing Secure Audio... 🎵");
+            audio.src = audioUrl;
+            startAudio();
+        }
+
+        function updatePlayerUI(songTitle, songArtist, songThumb, msg) {
+            title.innerText = songTitle;
+            artist.innerText = songArtist;
+            cover.src = songThumb;
+            statusMsg.innerText = msg;
+            
+            if ('mediaSession' in navigator) {
+                navigator.mediaSession.metadata = new MediaMetadata({
+                    title: songTitle, artist: songArtist,
+                    artwork: [{ src: songThumb, sizes: '512x512', type: 'image/jpeg' }]
+                });
+                navigator.mediaSession.setActionHandler('play', () => { audio.play(); playBtn.innerText = "⏸"; });
+                navigator.mediaSession.setActionHandler('pause', () => { audio.pause(); playBtn.innerText = "▶️"; });
+            }
+        }
+
+        function startAudio() {
+            audio.play().then(() => { playBtn.innerText = "⏸"; })
+            .catch(() => { playBtn.innerText = "▶️"; statusMsg.innerText = "Ready! Tap Play."; });
+        }
+
+        function togglePlay() {
+            if (!audio.src) return; 
+            if (audio.paused) { audio.play(); playBtn.innerText = "⏸"; } 
+            else { audio.pause(); playBtn.innerText = "▶️"; }
+        }
+
+        function toggleLoop() {
+            audio.loop = !audio.loop;
+            loopBtn.style.color = audio.loop ? "#00ff00" : "gray";
+            statusMsg.innerText = audio.loop ? "Loop Enabled" : "Loop Disabled";
+        }
+
+        function downloadSong() {
+            if (!audio.src) return statusMsg.innerText = "Play a song first!";
+            window.open(audio.src, '_blank');
+        }
+
+        function formatTime(seconds) {
+            if(isNaN(seconds)) return "0:00";
+            const min = Math.floor(seconds / 60);
+            const sec = Math.floor(seconds % 60);
+            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                progressBar.value = (audio.currentTime / audio.duration) * 100;
+                currentTimeEl.innerText = formatTime(audio.currentTime);
+                totalTimeEl.innerText = formatTime(audio.duration);
+            }
+        });
+
+        progressBar.addEventListener('input', () => {
+            if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration;
+        });
+
+        audio.addEventListener('ended', () => {
+            if (!audio.loop) playBtn.innerText = "▶️";
+        });
+    </script>
+</body>
+  </html>
+  
