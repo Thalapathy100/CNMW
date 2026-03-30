@@ -3,64 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CNMW - Premium Edition</title>
+    <title>CNMW - Ultimate Premium</title>
     <style>
         body { background-color: #0f0f13; color: #ffffff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px 0; min-height: 100vh; }
-        .player-container { background: #1a1a24; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 191, 255, 0.15); width: 90%; max-width: 350px; text-align: center; border: 1px solid #2d2d3d; margin-bottom: 20px; }
+        .player-container { background: #1a1a24; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 191, 255, 0.15); width: 90%; max-width: 350px; text-align: center; border: 1px solid #2d2d3d; margin-bottom: 20px; position: relative;}
+        
         .search-box { display: flex; gap: 10px; margin-bottom: 15px; }
         .search-box input { flex: 1; padding: 10px; border-radius: 10px; border: none; background: #2d2d3d; color: white; outline: none; }
         .search-box button { padding: 10px 15px; border-radius: 10px; border: none; background: #00bfff; color: white; font-weight: bold; cursor: pointer; }
         
-        .tabs { display: flex; width: 100%; background: #2d2d3d; border-radius: 10px; overflow: hidden; margin-bottom: 15px; }
-        .tab { flex: 1; padding: 10px 2px; text-align: center; cursor: pointer; font-size: 0.75em; font-weight: bold; color: #8888a0; transition: 0.3s; }
+        .tabs-container { width: 100%; overflow-x: auto; margin-bottom: 15px; border-radius: 10px; background: #2d2d3d; }
+        .tabs { display: flex; width: max-content; min-width: 100%; }
+        .tab { flex: 1; padding: 10px 15px; text-align: center; cursor: pointer; font-size: 0.8em; font-weight: bold; color: #8888a0; transition: 0.3s; white-space: nowrap; }
         .tab.active { background: #00bfff; color: white; }
 
-        .album-art { width: 100%; height: 250px; background: #252535; border-radius: 15px; margin-bottom: 15px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
-        .song-title { font-size: 1.2em; font-weight: bold; color: #00bfff; margin-bottom: 5px; }
-        .artist-name { font-size: 0.9em; color: #8888a0; margin-bottom: 15px; }
+        .album-art { width: 100%; height: 250px; background: #252535; border-radius: 15px; margin-bottom: 10px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
+        
+        /* TRENDY VISUALIZER */
+        .visualizer { display: flex; gap: 5px; justify-content: center; align-items: flex-end; height: 30px; margin-bottom: 15px; opacity: 0; transition: 0.3s; }
+        .visualizer.active { opacity: 1; }
+        .bar { width: 6px; background: #00ff88; border-radius: 3px; animation: bounce 0.5s infinite alternate; }
+        .bar:nth-child(1) { animation-delay: 0.1s; height: 40%; }
+        .bar:nth-child(2) { animation-delay: 0.3s; height: 100%; }
+        .bar:nth-child(3) { animation-delay: 0.0s; height: 60%; background: #00bfff;}
+        .bar:nth-child(4) { animation-delay: 0.2s; height: 90%; background: #00bfff;}
+        .bar:nth-child(5) { animation-delay: 0.4s; height: 50%; }
+        @keyframes bounce { from { transform: scaleY(0.3); } to { transform: scaleY(1); } }
+
+        .song-title { font-size: 1.2em; font-weight: bold; color: #00bfff; margin-bottom: 5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .artist-name { font-size: 0.9em; color: #8888a0; margin-bottom: 15px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
         
         .progress-container { display: flex; align-items: center; gap: 10px; font-size: 0.8em; color: #8888a0; margin-bottom: 15px; }
         input[type="range"] { flex: 1; accent-color: #00bfff; height: 4px; background: #333; border-radius: 5px; outline: none; cursor: pointer; }
         
-        .controls { display: flex; justify-content: center; align-items: center; gap: 20px; }
-        .controls button { background: none; border: none; color: #00bfff; font-size: 25px; cursor: pointer; transition: 0.2s; }
-        #playBtn { font-size: 45px; }
+        .controls { display: flex; justify-content: center; align-items: center; gap: 15px; }
+        .controls button { background: none; border: none; color: #00bfff; font-size: 22px; cursor: pointer; transition: 0.2s; }
+        #playBtn { font-size: 40px; }
         .controls button:active { transform: scale(0.9); color: white; }
 
         .list-container { display: none; width: 90%; max-width: 350px; text-align: left; }
         .list-container.active { display: block; }
         
         .result-item { background: #1a1a24; padding: 10px; border-radius: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; cursor: pointer; border: 1px solid #2d2d3d; transition: 0.2s; }
-        .result-item:hover { background: #252535; border-color: #00bfff; }
+        .result-item.playing-now { border-color: #00ff88; background: #252535; }
         .result-thumb { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; }
         .result-info { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
         .result-title { font-size: 0.9em; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: white;}
         .result-artist { font-size: 0.75em; color: #8888a0; }
-        .source-badge { font-size: 0.6em; background: #333; padding: 2px 5px; border-radius: 3px; width: max-content; margin-top: 3px;}
-        
-        .icon-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 0 5px; color: #555; transition: 0.3s; }
+        .icon-btn { background: none; border: none; font-size: 18px; cursor: pointer; padding: 0 5px; color: #888; transition: 0.3s; }
         .icon-btn.liked { color: #ff0055; transform: scale(1.1); }
+
+        /* LYRICS MODAL */
+        #lyricsModal { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15,15,19,0.95); border-radius: 20px; z-index: 100; flex-direction: column; align-items: center; padding: 20px; box-sizing: border-box; border: 1px solid #00bfff;}
+        #lyricsText { width: 100%; flex: 1; overflow-y: auto; color: #ccc; text-align: center; white-space: pre-line; line-height: 1.8; font-size: 0.9em; margin-top: 15px;}
+        
+        .settings-card { background: #1a1a24; padding: 15px; border-radius: 10px; border: 1px solid #2d2d3d; margin-bottom: 10px; }
+        .settings-card h3 { margin-top: 0; color: #00bfff; font-size: 1em; }
     </style>
 </head>
 <body>
 
     <div class="player-container">
-        <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search song...">
-            <button onclick="searchAll()">Search</button>
+        <!-- LYRICS MODAL OVERLAY -->
+        <div id="lyricsModal">
+            <button onclick="document.getElementById('lyricsModal').style.display='none'" style="align-self: flex-end; background: red; color: white; border: none; padding: 5px 15px; border-radius: 5px; font-weight: bold;">X Close</button>
+            <h3 style="color:#00ff88; margin-top:10px;">Lyrics</h3>
+            <div id="lyricsText">Loading lyrics...</div>
         </div>
 
-        <div class="tabs">
-            <div class="tab active" id="tab-saavn" onclick="switchTab('saavn')">🎵 Saavn</div>
-            <div class="tab" id="tab-yt" onclick="switchTab('yt')">🎥 YT</div>
-            <div class="tab" id="tab-fav" onclick="switchTab('fav'); loadFavorites();">❤️ Favs</div>
-            <div class="tab" id="tab-off" onclick="switchTab('off'); loadOffline();">💾 Offline</div>
+        <div class="search-box">
+            <input type="text" id="searchInput" placeholder="Search song...">
+            <button id="searchBtnUI" onclick="searchAll()">Search</button>
+        </div>
+
+        <div class="tabs-container">
+            <div class="tabs">
+                <div class="tab active" id="tab-saavn" onclick="switchTab('saavn')">🎵 Saavn</div>
+                <div class="tab" id="tab-yt" onclick="switchTab('yt')">🎥 YT</div>
+                <div class="tab" id="tab-fav" onclick="switchTab('fav'); loadFavorites();">❤️ Favs</div>
+                <div class="tab" id="tab-off" onclick="switchTab('off'); loadOffline();">📥 Offline</div>
+                <div class="tab" id="tab-set" onclick="switchTab('set')">⚙️ Settings</div>
+            </div>
         </div>
 
         <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=600&auto=format&fit=crop" id="cover" class="album-art">
         
-        <div class="song-title" id="title">CNMW Premium</div>
-        <div class="artist-name" id="artist">Search or Play!</div>
+        <!-- VISUALIZER -->
+        <div class="visualizer" id="visualizer">
+            <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+        </div>
+
+        <div class="song-title" id="title">CNMW Pro Edition</div>
+        <div class="artist-name" id="artist">Pick a vibe!</div>
         
         <audio id="audio"></audio>
 
@@ -71,17 +105,36 @@
         </div>
 
         <div class="controls">
-            <button onclick="toggleLoop()" id="loopBtn" style="color: gray;">🔁</button>
+            <button onclick="toggleLoop()" id="loopBtn" title="Loop">🔁</button>
+            <button onclick="playPrev()" title="Previous">⏮️</button>
             <button onclick="togglePlay()" id="playBtn">▶️</button>
-            <button onclick="saveToApp()" id="downBtn" title="Save to App">💾</button>
+            <button onclick="playNext()" title="Next">⏭️</button>
+            <button onclick="saveToApp()" title="Download">📥</button>
+            <button onclick="fetchLyrics()" title="Lyrics">📜</button>
         </div>
         <p id="statusMessage" style="color: #00bfff; font-size: 0.8em; margin-top: 10px;"></p>
     </div>
 
+    <!-- TABS CONTENT -->
     <div class="list-container active" id="list-saavn"></div>
     <div class="list-container" id="list-yt"></div>
     <div class="list-container" id="list-fav"></div>
     <div class="list-container" id="list-off"></div>
+    
+    <!-- Settings Tab -->
+    <div class="list-container" id="list-set">
+        <div class="settings-card">
+            <h3 id="langTitleUI">🌍 App Language</h3>
+            <select id="langSelect" onchange="changeLang(this.value)" style="width: 100%; padding: 10px; background: #2d2d3d; color: white; border: none; border-radius: 5px;">
+                <option value="en">English</option>
+                <option value="te">తెలుగు (Telugu)</option>
+            </select>
+        </div>
+        <div class="settings-card">
+            <h3 id="storageTitleUI">🗑️ Storage</h3>
+            <button onclick="clearAppCache()" style="width:100%; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:5px;">Clear App Data</button>
+        </div>
+    </div>
 
     <script>
         const audio = document.getElementById('audio');
@@ -94,15 +147,44 @@
         const progressBar = document.getElementById('progressBar');
         const currentTimeEl = document.getElementById('currentTime');
         const totalTimeEl = document.getElementById('totalTime');
+        const visualizer = document.getElementById('visualizer');
 
         const MY_SERVER_URL = "https://cnmw.onrender.com";
 
+        // Global Queues for Autoplay
+        let saavnResults = [];
         let favorites = JSON.parse(localStorage.getItem('cnmw_favs')) || [];
         let offlineDb = JSON.parse(localStorage.getItem('cnmw_offline')) || [];
+        
+        let currentQueue = [];
+        let currentIndex = 0;
         let currentTrack = null;
 
+        // --- MULTI-LANGUAGE ENGINE ---
+        const i18n = {
+            en: { search: "Search", t1: "🎵 Saavn", t2: "🎥 YT", t3: "❤️ Favs", t4: "📥 Offline", t5: "⚙️ Settings", lang: "🌍 App Language", store: "🗑️ Storage" },
+            te: { search: "వెతకండి", t1: "🎵 సావన్", t2: "🎥 యూట్యూబ్", t3: "❤️ ఇష్టమైనవి", t4: "📥 ఆఫ్‌లైన్", t5: "⚙️ సెట్టింగ్స్", lang: "🌍 యాప్ భాష", store: "🗑️ స్టోరేజ్ క్లియర్" }
+        };
+
+        function changeLang(lang) {
+            document.getElementById('searchBtnUI').innerText = i18n[lang].search;
+            document.getElementById('tab-saavn').innerText = i18n[lang].t1;
+            document.getElementById('tab-yt').innerText = i18n[lang].t2;
+            document.getElementById('tab-fav').innerText = i18n[lang].t3;
+            document.getElementById('tab-off').innerText = i18n[lang].t4;
+            document.getElementById('tab-set').innerText = i18n[lang].t5;
+            document.getElementById('langTitleUI').innerText = i18n[lang].lang;
+            document.getElementById('storageTitleUI').innerText = i18n[lang].store;
+            localStorage.setItem('cnmw_lang', lang);
+        }
+        
+        // Load saved language on startup
+        let savedLang = localStorage.getItem('cnmw_lang') || 'en';
+        document.getElementById('langSelect').value = savedLang;
+        changeLang(savedLang);
+
         function switchTab(platform) {
-            ['saavn', 'yt', 'fav', 'off'].forEach(p => {
+            ['saavn', 'yt', 'fav', 'off', 'set'].forEach(p => {
                 document.getElementById(`tab-${p}`).className = platform === p ? 'tab active' : 'tab';
                 document.getElementById(`list-${p}`).className = platform === p ? 'list-container active' : 'list-container';
             });
@@ -116,20 +198,20 @@
             statusMsg.innerText = "Searching... 🚀";
             switchTab('saavn');
             fetchSaavn(query);
-            fetchYT(query);
         }
 
         async function fetchSaavn(query) {
             const container = document.getElementById('list-saavn');
-            container.innerHTML = "<p style='text-align:center;'>Fetching HQ...</p>";
+            container.innerHTML = "<p style='text-align:center;'>Fetching Magic...</p>";
             try {
                 const response = await fetch(`${MY_SERVER_URL}/api/saavn?q=${encodeURIComponent(query)}`);
                 const json = await response.json();
                 let songs = json.data?.results || json.data || json.results || [];
 
                 if (songs.length > 0) {
+                    saavnResults = []; // Clear queue
                     container.innerHTML = "";
-                    songs.forEach(song => {
+                    songs.forEach((song, index) => {
                         let sTitle = song.name || song.title || "Unknown";
                         let sArtist = song.primaryArtists || song.singers || "Unknown";
                         let sThumb = song.image ? (Array.isArray(song.image) ? song.image[song.image.length-1].link || song.image[song.image.length-1].url : song.image) : "https://via.placeholder.com/50";
@@ -138,68 +220,133 @@
                         let sId = song.id || sTitle;
 
                         if (!sUrl) return;
+                        saavnResults.push({ id: sId, url: sUrl, title: sTitle, artist: sArtist, thumb: sThumb });
+
                         let heart = isFav(sId) ? '❤️' : '🤍';
                         let likedClass = isFav(sId) ? 'liked' : '';
 
                         const item = document.createElement('div');
                         item.className = 'result-item';
+                        item.id = `item-saavn-${index}`;
                         item.innerHTML = `
-                            <img src="${sThumb}" class="result-thumb" onclick="playAudio('${sId}', '${sUrl}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${sThumb}')">
-                            <div class="result-info" onclick="playAudio('${sId}', '${sUrl}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${sThumb}')">
+                            <img src="${sThumb}" class="result-thumb" onclick="playFromQueue(${index}, 'saavn')">
+                            <div class="result-info" onclick="playFromQueue(${index}, 'saavn')">
                                 <span class="result-title">${sTitle}</span>
                                 <span class="result-artist">${sArtist}</span>
-                                <span class="source-badge" style="color:#00ff88;">🎵 Saavn HQ</span>
                             </div>
                             <button class="icon-btn ${likedClass}" onclick="toggleLike(this, '${sId}', '${sUrl}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${sThumb}')">${heart}</button>
                         `;
                         container.appendChild(item);
                     });
+                    statusMsg.innerText = "Queue Ready!";
                 } else container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>No songs found.</p>";
             } catch (err) { container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>Error loading.</p>"; }
         }
 
-        async function fetchYT(query) {
-            const container = document.getElementById('list-yt');
-            container.innerHTML = "<p style='text-align:center;'>Fetching YT...</p>";
-            try {
-                const response = await fetch(`${MY_SERVER_URL}/api/yt?q=${encodeURIComponent(query)}`);
-                const data = await response.json();
-                
-                if (data.items && data.items.length > 0) {
-                    container.innerHTML = "";
-                    data.items.slice(0, 15).forEach(video => {
-                        const vidId = video.videoId;
-                        const thumb = video.videoThumbnails ? video.videoThumbnails[0].url : "https://via.placeholder.com/50";
-                        const sServer = data.server;
-                        let heart = isFav(vidId) ? '❤️' : '🤍';
-                        let likedClass = isFav(vidId) ? 'liked' : '';
+        // --- QUEUE & AUTOPLAY LOGIC ---
+        function playFromQueue(index, context) {
+            let list = [];
+            if(context === 'saavn') list = saavnResults;
+            if(context === 'fav') list = favorites;
+            if(context === 'off') list = offlineDb;
 
-                        const item = document.createElement('div');
-                        item.className = 'result-item';
-                        item.innerHTML = `
-                            <img src="${thumb}" class="result-thumb" onclick="playYT('${vidId}', '${sServer}', '${video.title.replace(/'/g, "\\'")}', '${video.author.replace(/'/g, "\\'")}', '${thumb}')">
-                            <div class="result-info" onclick="playYT('${vidId}', '${sServer}', '${video.title.replace(/'/g, "\\'")}', '${video.author.replace(/'/g, "\\'")}', '${thumb}')">
-                                <span class="result-title">${video.title}</span>
-                                <span class="result-artist">${video.author}</span>
-                                <span class="source-badge" style="color:#ff4d4d;">🎥 YT Source</span>
-                            </div>
-                            <button class="icon-btn ${likedClass}" onclick="toggleLike(this, '${vidId}', 'YT:${sServer}', '${video.title.replace(/'/g, "\\'")}', '${video.author.replace(/'/g, "\\'")}', '${thumb}')">${heart}</button>
-                        `;
-                        container.appendChild(item);
-                    });
-                }
-            } catch (err) { container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>YT Error.</p>"; }
+            if(list.length === 0 || !list[index]) return;
+            
+            currentQueue = list;
+            currentIndex = index;
+            let song = list[index];
+
+            // Highlight playing song
+            document.querySelectorAll('.result-item').forEach(el => el.classList.remove('playing-now'));
+            let activeEl = document.getElementById(`item-${context}-${index}`);
+            if(activeEl) activeEl.classList.add('playing-now');
+
+            playAudio(song.id, song.url, song.title, song.artist, song.thumb);
         }
 
-        // --- FAVORITES LOGIC ---
+        function playNext() {
+            if (currentIndex < currentQueue.length - 1) {
+                let context = currentQueue === saavnResults ? 'saavn' : currentQueue === favorites ? 'fav' : 'off';
+                playFromQueue(currentIndex + 1, context);
+            } else { statusMsg.innerText = "Queue Ended 🛑"; }
+        }
+
+        function playPrev() {
+            if (currentIndex > 0) {
+                let context = currentQueue === saavnResults ? 'saavn' : currentQueue === favorites ? 'fav' : 'off';
+                playFromQueue(currentIndex - 1, context);
+            }
+        }
+
+        audio.addEventListener('ended', () => {
+            if (!audio.loop) playNext(); // The Magic Autoplay Engine!
+        });
+
+        // --- LYRICS ENGINE ---
+        async function fetchLyrics() {
+            if(!currentTrack) return statusMsg.innerText = "Play a song first!";
+            if(currentTrack.url.startsWith('YT:')) return statusMsg.innerText = "Lyrics only for Saavn songs!";
+            
+            const modal = document.getElementById('lyricsModal');
+            const textEl = document.getElementById('lyricsText');
+            modal.style.display = 'flex';
+            textEl.innerText = "Extracting lyrics from server... ⏳";
+
+            try {
+                // Using Saavn unofficial API for lyrics
+                const response = await fetch(`https://saavn.me/lyrics?id=${currentTrack.id}`);
+                const data = await response.json();
+                
+                if(data.status === "SUCCESS" && data.data.lyrics) {
+                    textEl.innerHTML = data.data.lyrics.replace(/<br>/g, "\n");
+                } else {
+                    textEl.innerText = "Sorry, lyrics not available for this song 🥲";
+                }
+            } catch(e) { textEl.innerText = "Failed to fetch lyrics."; }
+        }
+
+        // --- PLAYER UI ---
+        function playAudio(id, audioUrl, sTitle, sArtist, sThumb) {
+            currentTrack = { id, url: audioUrl, title: sTitle, artist: sArtist, thumb: sThumb };
+            title.innerText = sTitle; artist.innerText = sArtist; cover.src = sThumb; statusMsg.innerText = "Playing... 🎵";
+            audio.src = audioUrl;
+            startAudio();
+        }
+
+        function startAudio() { 
+            audio.play().then(() => { 
+                playBtn.innerText = "⏸"; 
+                visualizer.classList.add('active'); // Start Visualizer
+            }).catch(() => { playBtn.innerText = "▶️"; }); 
+        }
+        
+        function togglePlay() { 
+            if (!audio.src) return; 
+            if (audio.paused) { audio.play(); playBtn.innerText = "⏸"; visualizer.classList.add('active'); } 
+            else { audio.pause(); playBtn.innerText = "▶️"; visualizer.classList.remove('active'); } 
+        }
+
+        function toggleLoop() { audio.loop = !audio.loop; loopBtn.style.color = audio.loop ? "#00ff00" : "gray"; }
+
+        audio.addEventListener('timeupdate', () => {
+            if (audio.duration) {
+                progressBar.value = (audio.currentTime / audio.duration) * 100;
+                let min = Math.floor(audio.currentTime / 60); let sec = Math.floor(audio.currentTime % 60);
+                currentTimeEl.innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+                let tMin = Math.floor(audio.duration / 60); let tSec = Math.floor(audio.duration % 60);
+                if(!isNaN(tMin)) totalTimeEl.innerText = `${tMin}:${tSec < 10 ? '0' : ''}${tSec}`;
+            }
+        });
+
+        progressBar.addEventListener('input', () => { if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration; });
+
+        // --- FAVORITES & OFFLINE LOGIC ---
         function toggleLike(btn, id, url, sTitle, sArtist, thumb) {
             btn.classList.toggle('liked');
             if(btn.classList.contains('liked')) {
-                btn.innerText = '❤️';
-                favorites.push({ id, url, title: sTitle, artist: sArtist, thumb });
+                btn.innerText = '❤️'; favorites.push({ id, url, title: sTitle, artist: sArtist, thumb });
             } else {
-                btn.innerText = '🤍';
-                favorites = favorites.filter(song => song.id !== id);
+                btn.innerText = '🤍'; favorites = favorites.filter(song => song.id !== id);
             }
             localStorage.setItem('cnmw_favs', JSON.stringify(favorites));
             loadFavorites();
@@ -208,129 +355,5 @@
         function loadFavorites() {
             const container = document.getElementById('list-fav');
             container.innerHTML = "";
-            if(favorites.length === 0) return container.innerHTML = "<p style='text-align:center; color:gray;'>No Favs yet.</p>";
-            
-            favorites.forEach(song => {
-                const isYT = song.url.startsWith('YT:');
-                const onClickLogic = isYT ? `playYT('${song.id}', '${song.url.replace('YT:','')}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')`
-                                          : `playAudio('${song.id}', '${song.url}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')`;
-
-                const item = document.createElement('div');
-                item.className = 'result-item';
-                item.innerHTML = `
-                    <img src="${song.thumb}" class="result-thumb" onclick="${onClickLogic}">
-                    <div class="result-info" onclick="${onClickLogic}">
-                        <span class="result-title">${song.title}</span>
-                        <span class="result-artist">${song.artist}</span>
-                    </div>
-                    <button class="icon-btn liked" onclick="toggleLike(this, '${song.id}', '${song.url}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')">❤️</button>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        // --- IN-APP OFFLINE DOWNLOADS (Cache API) ---
-        async function saveToApp() {
-            if(!currentTrack) return statusMsg.innerText = "Play a song first!";
-            if(currentTrack.url.startsWith('YT:')) return statusMsg.innerText = "YT saving coming soon! Only Saavn supported.";
-            
-            statusMsg.innerText = "Saving to App... ⏳";
-            try {
-                // Opening Browser's Secret Cache
-                const cache = await caches.open('cnmw-music-cache');
-                await cache.add(currentTrack.url); // Saves the actual MP3 Blob inside app
-                
-                // Save details to LocalStorage for the UI
-                if(!offlineDb.some(s => s.id === currentTrack.id)) {
-                    offlineDb.push(currentTrack);
-                    localStorage.setItem('cnmw_offline', JSON.stringify(offlineDb));
-                }
-                statusMsg.innerText = "Saved Offline! 💾 (Check Tab)";
-                loadOffline();
-            } catch(e) {
-                statusMsg.innerText = "Failed to save offline.";
-            }
-        }
-
-        function loadOffline() {
-            const container = document.getElementById('list-off');
-            container.innerHTML = "";
-            if(offlineDb.length === 0) return container.innerHTML = "<p style='text-align:center; color:gray;'>Click 💾 to save songs for offline playback.</p>";
-            
-            offlineDb.forEach(song => {
-                const item = document.createElement('div');
-                item.className = 'result-item';
-                item.innerHTML = `
-                    <img src="${song.thumb}" class="result-thumb" onclick="playAudio('${song.id}', '${song.url}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')">
-                    <div class="result-info" onclick="playAudio('${song.id}', '${song.url}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')">
-                        <span class="result-title">${song.title}</span>
-                        <span class="result-artist">${song.artist}</span>
-                        <span class="source-badge" style="color:#ffcc00;">💾 Offline Ready</span>
-                    </div>
-                `;
-                container.appendChild(item);
-            });
-        }
-
-        // --- PLAYER LOGIC ---
-        function playAudio(id, audioUrl, sTitle, sArtist, sThumb) {
-            currentTrack = { id, url: audioUrl, title: sTitle, artist: sArtist, thumb: sThumb };
-            updateUI(sTitle, sArtist, sThumb, "Playing Audio... 🎵");
-            audio.src = audioUrl;
-            startAudio();
-        }
-
-        async function playYT(videoId, serverUrl, sTitle, sArtist, sThumb) {
-            currentTrack = { id: videoId, url: `YT:${serverUrl}`, title: sTitle, artist: sArtist, thumb: sThumb };
-            updateUI(sTitle, sArtist, sThumb, "Extracting... 🎧");
-            try {
-                const response = await fetch(`${MY_SERVER_URL}/api/yt/stream?id=${videoId}&server=${encodeURIComponent(serverUrl)}`);
-                const data = await response.json();
-                const audioStreams = data.adaptiveFormats?.filter(a => a.type.includes('audio')) || [];
-                if (audioStreams.length > 0) {
-                    audio.src = audioStreams[0].url;
-                    statusMsg.innerText = "Playing YT Stream...";
-                    startAudio();
-                } else statusMsg.innerText = "No stream found.";
-            } catch (err) { statusMsg.innerText = "Extraction failed."; }
-        }
-
-        function updateUI(sTitle, sArtist, sThumb, msg) {
-            title.innerText = sTitle; artist.innerText = sArtist; cover.src = sThumb; statusMsg.innerText = msg;
-        }
-
-        function startAudio() {
-            audio.play().then(() => { playBtn.innerText = "⏸"; }).catch(() => { playBtn.innerText = "▶️"; });
-        }
-
-        function togglePlay() {
-            if (!audio.src) return; 
-            if (audio.paused) { audio.play(); playBtn.innerText = "⏸"; } 
-            else { audio.pause(); playBtn.innerText = "▶️"; }
-        }
-
-        function toggleLoop() {
-            audio.loop = !audio.loop;
-            loopBtn.style.color = audio.loop ? "#00ff00" : "gray";
-            statusMsg.innerText = audio.loop ? "Loop Enabled" : "Loop Disabled";
-        }
-
-        audio.addEventListener('timeupdate', () => {
-            if (audio.duration) {
-                progressBar.value = (audio.currentTime / audio.duration) * 100;
-                let min = Math.floor(audio.currentTime / 60); let sec = Math.floor(audio.currentTime % 60);
-                currentTimeEl.innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
-                
-                let tMin = Math.floor(audio.duration / 60); let tSec = Math.floor(audio.duration % 60);
-                if(!isNaN(tMin)) totalTimeEl.innerText = `${tMin}:${tSec < 10 ? '0' : ''}${tSec}`;
-            }
-        });
-
-        progressBar.addEventListener('input', () => { if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration; });
-        audio.addEventListener('ended', () => { if (!audio.loop) playBtn.innerText = "▶️"; });
-
-        // Load tabs on startup
-        loadFavorites(); loadOffline();
-    </script>
-</body>
-</html>
+            if(favorites.length === 0) return;
+            favorites.forEach((s
