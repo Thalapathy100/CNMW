@@ -3,17 +3,25 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CNMW - Ultimate Premium</title>
+    <title>CNMW - Bulletproof Premium</title>
     
     <!-- 🚨 HACKER CRASH DETECTOR 🚨 -->
     <script>
         window.onerror = function(msg, url, line) {
+            if (msg.includes("searchAll") || msg.includes("switchTab") || msg.includes("handleEnter")) {
+                document.body.innerHTML = `
+                <div style="text-align:center; padding:40px; color:white; font-family:sans-serif; background:#0f0f13; height:100vh;">
+                    <h1 style="color:#ffcc00;">⚠️ Code Miss Ayyindi Bro!</h1>
+                    <p style="color:#888;">Nuvvu copy chesetappudu kinda unna main Script cut aipoyindi.</p>
+                    <p style="color:#00bfff;">Please naa message lo unna "Copy" icon meeda click chesi, motham paste cheyi!</p>
+                </div>`;
+                return true;
+            }
             document.body.innerHTML = `
             <div style="text-align:center; padding:40px; color:white; font-family:sans-serif; background:#0f0f13; height:100vh;">
                 <h1 style="color:#ff4d4d;">App Crashed 💥</h1>
-                <p style="color:#888;">Nee patha data valla error vachindi.</p>
                 <p style="color:#ff4d4d; font-size:12px; background:#000; padding:10px;">Error: ${msg} (Line: ${line})</p>
-                <button onclick="localStorage.clear(); alert('Fix aipoyindi! Reloading...'); location.reload();" style="padding:15px; background:#00bfff; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; margin-top:20px;">Auto-Fix & Restart</button>
+                <button onclick="localStorage.clear(); location.reload();" style="padding:15px; background:#00bfff; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer; margin-top:20px;">Fix & Restart</button>
             </div>`;
             return true;
         };
@@ -75,7 +83,10 @@
 </head>
 <body>
 
+    <p id="systemStatus" style="color:#ff4d4d; font-size:12px; font-weight:bold;">System Offline 🔴 (Code Incomplete)</p>
+
     <div class="player-container">
+        <!-- LYRICS MODAL -->
         <div id="lyricsModal">
             <button onclick="document.getElementById('lyricsModal').style.display='none'" style="align-self: flex-end; background: red; color: white; border: none; padding: 5px 15px; border-radius: 5px; font-weight: bold; cursor: pointer;">X Close</button>
             <h3 style="color:#00ff88; margin-top:10px;">Lyrics</h3>
@@ -144,12 +155,11 @@
         </div>
     </div>
 
+    <!-- 🚨 MAIN BRAIN: IDI MISS AITHE APP PANICHEYADU 🚨 -->
     <script>
-        // AUTO CLEANER: Runs once to ensure no corrupted data from old versions breaks the app!
-        if (!localStorage.getItem('cnmw_v4_fixed')) {
-            localStorage.clear();
-            localStorage.setItem('cnmw_v4_fixed', 'true');
-        }
+        // Set System to Ready Mode if script loads successfully
+        document.getElementById('systemStatus').innerText = "System Ready 🟢";
+        document.getElementById('systemStatus').style.color = "#00ff88";
 
         const audio = document.getElementById('audio');
         const playBtn = document.getElementById('playBtn');
@@ -315,15 +325,4 @@
             if (audio.duration) {
                 progressBar.value = (audio.currentTime / audio.duration) * 100;
                 let min = Math.floor(audio.currentTime / 60); let sec = Math.floor(audio.currentTime % 60);
-                currentTimeEl.innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
-                let tMin = Math.floor(audio.duration / 60); let tSec = Math.floor(audio.duration % 60);
-                if(!isNaN(tMin)) totalTimeEl.innerText = `${tMin}:${tSec < 10 ? '0' : ''}${tSec}`;
-            }
-        });
-
-        progressBar.addEventListener('input', () => { if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration; });
-
-        function toggleLike(btn, id, url, sTitle, sArtist, thumb) {
-            btn.classList.toggle('liked');
-            if(btn.classList.contains('liked')) { btn.innerText = '❤️'; favorites.push({ id, url, title: sTitle, artist: sArtist, thumb }); } 
-            else { btn.inne
+           
