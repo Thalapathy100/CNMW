@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CNMW - Ultimate Premium</title>
+    <title>CNMW - Bulletproof Premium</title>
     <style>
         body { background-color: #0f0f13; color: #ffffff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px 0; min-height: 100vh; }
         .player-container { background: #1a1a24; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 191, 255, 0.15); width: 90%; max-width: 350px; text-align: center; border: 1px solid #2d2d3d; margin-bottom: 20px; position: relative;}
@@ -59,9 +59,14 @@
         
         .settings-card { background: #1a1a24; padding: 15px; border-radius: 10px; border: 1px solid #2d2d3d; margin-bottom: 10px; }
         .settings-card h3 { margin-top: 0; color: #00bfff; font-size: 1em; }
+
+        /* SECRET DEBUG LOG */
+        #debugLog { display: none; color: #ff4d4d; font-size: 11px; background: #000; padding: 10px; border-radius: 5px; margin-top: 10px; width: 90%; max-width: 350px; word-wrap: break-word; border: 1px solid red; }
     </style>
 </head>
 <body>
+
+    <div id="debugLog"><strong>Developer Logs:</strong></div>
 
     <div class="player-container">
         <!-- LYRICS MODAL -->
@@ -72,7 +77,6 @@
         </div>
 
         <div class="search-box">
-            <!-- 🚨 KEYBOARD ENTER FIX HERE 🚨 -->
             <input type="text" id="searchInput" placeholder="Search song..." onkeypress="handleEnter(event)">
             <button id="searchBtnUI" onclick="searchAll()">Search</button>
         </div>
@@ -89,7 +93,6 @@
 
         <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=600&auto=format&fit=crop" id="cover" class="album-art">
         
-        <!-- VISUALIZER -->
         <div class="visualizer" id="visualizer">
             <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
         </div>
@@ -130,12 +133,19 @@
             </select>
         </div>
         <div class="settings-card">
-            <h3 id="storageTitleUI">🗑️ Storage</h3>
-            <button onclick="clearAppCache()" style="width:100%; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:5px; cursor: pointer;">Clear App Data</button>
+            <h3 id="storageTitleUI">🗑️ Storage (Fix Errors)</h3>
+            <button onclick="clearAppCache()" style="width:100%; padding:10px; background:#ff4d4d; color:white; border:none; border-radius:5px; cursor: pointer; font-weight:bold;">Clear App Data / Fix Freeze</button>
         </div>
     </div>
 
     <script>
+        // HACKER DEBUGGER: Catches any invisible errors and shows them on screen!
+        window.onerror = function(msg, url, line) {
+            const dbg = document.getElementById('debugLog');
+            dbg.style.display = 'block';
+            dbg.innerHTML += `<br>[Line ${line}]: ${msg}`;
+        };
+
         const audio = document.getElementById('audio');
         const playBtn = document.getElementById('playBtn');
         const loopBtn = document.getElementById('loopBtn');
@@ -150,35 +160,29 @@
 
         const MY_SERVER_URL = "https://cnmw.onrender.com";
 
-        // 🚨 SAFE DB PARSE TO PREVENT CRASHES 🚨
+        // 🚨 BULLETPROOF DATABASE 🚨
         function getSafeDB(key) {
-            try { return JSON.parse(localStorage.getItem(key)) || []; } 
-            catch(e) { return []; }
+            try { 
+                let data = JSON.parse(localStorage.getItem(key));
+                return Array.isArray(data) ? data : []; 
+            } catch(e) { return []; }
         }
 
         let saavnResults = [];
-        let favorites = getSafeDB('cnmw_favs');
-        let offlineDb = getSafeDB('cnmw_offline');
-        
+        let favorites = [];
+        let offlineDb = [];
         let currentQueue = [];
         let currentIndex = 0;
         let currentTrack = null;
 
-        // --- KEYBOARD ENTER FIX ---
-        function handleEnter(e) {
-            if (e.key === 'Enter') {
-                searchAll();
-                document.getElementById('searchInput').blur(); // Hides keyboard automatically!
-            }
-        }
-
-        // --- MULTI-LANGUAGE ENGINE ---
+        // MULTI-LANGUAGE ENGINE
         const i18n = {
             en: { search: "Search", t1: "🎵 Saavn", t2: "🎥 YT", t3: "❤️ Favs", t4: "📥 Offline", t5: "⚙️ Settings", lang: "🌍 App Language", store: "🗑️ Storage" },
             te: { search: "వెతకండి", t1: "🎵 సావన్", t2: "🎥 యూట్యూబ్", t3: "❤️ ఇష్టమైనవి", t4: "📥 ఆఫ్‌లైన్", t5: "⚙️ సెట్టింగ్స్", lang: "🌍 యాప్ భాష", store: "🗑️ స్టోరేజ్ క్లియర్" }
         };
 
         function changeLang(lang) {
+            if(!i18n[lang]) lang = 'en'; // Safe fallback
             document.getElementById('searchBtnUI').innerText = i18n[lang].search;
             document.getElementById('tab-saavn').innerText = i18n[lang].t1;
             document.getElementById('tab-yt').innerText = i18n[lang].t2;
@@ -189,10 +193,33 @@
             document.getElementById('storageTitleUI').innerText = i18n[lang].store;
             localStorage.setItem('cnmw_lang', lang);
         }
-        
-        let savedLang = localStorage.getItem('cnmw_lang') || 'en';
-        document.getElementById('langSelect').value = savedLang;
-        changeLang(savedLang);
+
+        // --- APP INITIALIZER (Self-Healing) ---
+        window.onload = () => {
+            try {
+                favorites = getSafeDB('cnmw_favs');
+                offlineDb = getSafeDB('cnmw_offline');
+                
+                let savedLang = localStorage.getItem('cnmw_lang');
+                if (!i18n[savedLang]) savedLang = 'en';
+                document.getElementById('langSelect').value = savedLang;
+                changeLang(savedLang);
+
+                loadFavorites(); 
+                loadOffline();
+            } catch (e) {
+                console.error("App Corrupted. Healing...", e);
+                localStorage.clear(); // Wipes poisoned cache
+                favorites = []; offlineDb = [];
+            }
+        };
+
+        function handleEnter(e) {
+            if (e.key === 'Enter') {
+                searchAll();
+                document.getElementById('searchInput').blur(); 
+            }
+        }
 
         function switchTab(platform) {
             ['saavn', 'yt', 'fav', 'off', 'set'].forEach(p => {
@@ -223,18 +250,20 @@
                     saavnResults = []; 
                     container.innerHTML = "";
                     songs.forEach((song, index) => {
-                        let sTitle = song.name || song.title || "Unknown";
-                        let sArtist = song.primaryArtists || song.singers || "Unknown";
+                        let sTitle = String(song.name || song.title || "Unknown");
+                        let sArtist = String(song.primaryArtists || song.singers || "Unknown");
                         let sThumb = song.image ? (Array.isArray(song.image) ? song.image[song.image.length-1].link || song.image[song.image.length-1].url : song.image) : "https://via.placeholder.com/50";
                         let dl = song.downloadUrl || song.media_url;
                         let sUrl = dl ? (Array.isArray(dl) ? dl[dl.length-1].link || dl[dl.length-1].url : dl) : "";
-                        let sId = song.id || sTitle;
+                        let sId = String(song.id || sTitle);
 
                         if (!sUrl) return;
                         saavnResults.push({ id: sId, url: sUrl, title: sTitle, artist: sArtist, thumb: sThumb });
 
                         let heart = isFav(sId) ? '❤️' : '🤍';
                         let likedClass = isFav(sId) ? 'liked' : '';
+                        let cleanTitle = sTitle.replace(/'/g, "\\'");
+                        let cleanArtist = sArtist.replace(/'/g, "\\'");
 
                         const item = document.createElement('div');
                         item.className = 'result-item';
@@ -245,27 +274,23 @@
                                 <span class="result-title">${sTitle}</span>
                                 <span class="result-artist">${sArtist}</span>
                             </div>
-                            <button class="icon-btn ${likedClass}" onclick="toggleLike(this, '${sId}', '${sUrl}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${sThumb}')">${heart}</button>
+                            <button class="icon-btn ${likedClass}" onclick="toggleLike(this, '${sId}', '${sUrl}', '${cleanTitle}', '${cleanArtist}', '${sThumb}')">${heart}</button>
                         `;
                         container.appendChild(item);
                     });
                     statusMsg.innerText = "Queue Ready!";
                 } else container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>No songs found.</p>";
-            } catch (err) { container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>Backend waking up... Try again in 30s.</p>"; }
+            } catch (err) { 
+                container.innerHTML = `<p style='color:#ff4d4d; text-align:center;'>Failed to fetch.</p>`; 
+            }
         }
 
-        // --- QUEUE & AUTOPLAY LOGIC ---
+        // QUEUE & AUTOPLAY
         function playFromQueue(index, context) {
-            let list = [];
-            if(context === 'saavn') list = saavnResults;
-            if(context === 'fav') list = favorites;
-            if(context === 'off') list = offlineDb;
-
+            let list = context === 'saavn' ? saavnResults : context === 'fav' ? favorites : offlineDb;
             if(list.length === 0 || !list[index]) return;
             
-            currentQueue = list;
-            currentIndex = index;
-            let song = list[index];
+            currentQueue = list; currentIndex = index; let song = list[index];
 
             document.querySelectorAll('.result-item').forEach(el => el.classList.remove('playing-now'));
             let activeEl = document.getElementById(`item-${context}-${index}`);
@@ -290,48 +315,27 @@
 
         audio.addEventListener('ended', () => { if (!audio.loop) playNext(); });
 
-        // --- LYRICS ENGINE ---
         async function fetchLyrics() {
             if(!currentTrack) return statusMsg.innerText = "Play a song first!";
-            
             const modal = document.getElementById('lyricsModal');
             const textEl = document.getElementById('lyricsText');
-            modal.style.display = 'flex';
-            textEl.innerText = "Extracting lyrics from server... ⏳";
-
+            modal.style.display = 'flex'; textEl.innerText = "Extracting lyrics... ⏳";
             try {
                 const response = await fetch(`https://saavn.me/lyrics?id=${currentTrack.id}`);
                 const data = await response.json();
-                
-                if(data.status === "SUCCESS" && data.data.lyrics) {
-                    textEl.innerHTML = data.data.lyrics.replace(/<br>/g, "\n");
-                } else {
-                    textEl.innerText = "Sorry, lyrics not available for this song 🥲";
-                }
+                if(data.status === "SUCCESS" && data.data.lyrics) textEl.innerHTML = data.data.lyrics.replace(/<br>/g, "\n");
+                else textEl.innerText = "Sorry, lyrics not available 🥲";
             } catch(e) { textEl.innerText = "Failed to fetch lyrics."; }
         }
 
-        // --- PLAYER UI ---
         function playAudio(id, audioUrl, sTitle, sArtist, sThumb) {
             currentTrack = { id, url: audioUrl, title: sTitle, artist: sArtist, thumb: sThumb };
             title.innerText = sTitle; artist.innerText = sArtist; cover.src = sThumb; statusMsg.innerText = "Playing... 🎵";
-            audio.src = audioUrl;
-            startAudio();
+            audio.src = audioUrl; startAudio();
         }
 
-        function startAudio() { 
-            audio.play().then(() => { 
-                playBtn.innerText = "⏸"; 
-                visualizer.classList.add('active'); 
-            }).catch(() => { playBtn.innerText = "▶️"; }); 
-        }
-        
-        function togglePlay() { 
-            if (!audio.src) return; 
-            if (audio.paused) { audio.play(); playBtn.innerText = "⏸"; visualizer.classList.add('active'); } 
-            else { audio.pause(); playBtn.innerText = "▶️"; visualizer.classList.remove('active'); } 
-        }
-
+        function startAudio() { audio.play().then(() => { playBtn.innerText = "⏸"; visualizer.classList.add('active'); }).catch(() => { playBtn.innerText = "▶️"; }); }
+        function togglePlay() { if (!audio.src) return; if (audio.paused) { audio.play(); playBtn.innerText = "⏸"; visualizer.classList.add('active'); } else { audio.pause(); playBtn.innerText = "▶️"; visualizer.classList.remove('active'); } }
         function toggleLoop() { audio.loop = !audio.loop; loopBtn.style.color = audio.loop ? "#00ff00" : "gray"; }
 
         audio.addEventListener('timeupdate', () => {
@@ -340,24 +344,4 @@
                 let min = Math.floor(audio.currentTime / 60); let sec = Math.floor(audio.currentTime % 60);
                 currentTimeEl.innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
                 let tMin = Math.floor(audio.duration / 60); let tSec = Math.floor(audio.duration % 60);
-                if(!isNaN(tMin)) totalTimeEl.innerText = `${tMin}:${tSec < 10 ? '0' : ''}${tSec}`;
-            }
-        });
-
-        progressBar.addEventListener('input', () => { if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration; });
-
-        // --- FAVORITES & OFFLINE LOGIC ---
-        function toggleLike(btn, id, url, sTitle, sArtist, thumb) {
-            btn.classList.toggle('liked');
-            if(btn.classList.contains('liked')) {
-                btn.innerText = '❤️'; favorites.push({ id, url, title: sTitle, artist: sArtist, thumb });
-            } else {
-                btn.innerText = '🤍'; favorites = favorites.filter(song => song.id !== id);
-            }
-            localStorage.setItem('cnmw_favs', JSON.stringify(favorites));
-            loadFavorites();
-        }
-
-        function loadFavorites() {
-            const container = document.getElementById('list-fav');
- 
+                if(!isNaN(tMin)) totalTimeEl.innerText = `${tMin}:${tSec < 10 ? '0' : ''}$
