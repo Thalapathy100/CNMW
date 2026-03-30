@@ -3,47 +3,24 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CNMW - The Ultimate Player</title>
+    <title>CNMW - Premium Edition</title>
     <style>
-        body { 
-            background-color: #0f0f13; color: #ffffff; 
-            font-family: 'Segoe UI', sans-serif; 
-            display: flex; flex-direction: column; align-items: center; 
-            margin: 0; padding: 20px 0; min-height: 100vh;
-        }
-        .player-container { 
-            background: #1a1a24; padding: 25px; border-radius: 20px; 
-            box-shadow: 0 10px 30px rgba(0, 191, 255, 0.15); 
-            width: 90%; max-width: 350px; text-align: center; 
-            border: 1px solid #2d2d3d; margin-bottom: 20px;
-        }
+        body { background-color: #0f0f13; color: #ffffff; font-family: 'Segoe UI', sans-serif; display: flex; flex-direction: column; align-items: center; margin: 0; padding: 20px 0; min-height: 100vh; }
+        .player-container { background: #1a1a24; padding: 25px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0, 191, 255, 0.15); width: 90%; max-width: 350px; text-align: center; border: 1px solid #2d2d3d; margin-bottom: 20px; }
         .search-box { display: flex; gap: 10px; margin-bottom: 15px; }
-        .search-box input {
-            flex: 1; padding: 10px; border-radius: 10px; border: none;
-            background: #2d2d3d; color: white; outline: none;
-        }
-        .search-box button {
-            padding: 10px 15px; border-radius: 10px; border: none;
-            background: #00bfff; color: white; font-weight: bold; cursor: pointer;
-        }
+        .search-box input { flex: 1; padding: 10px; border-radius: 10px; border: none; background: #2d2d3d; color: white; outline: none; }
+        .search-box button { padding: 10px 15px; border-radius: 10px; border: none; background: #00bfff; color: white; font-weight: bold; cursor: pointer; }
         
         .tabs { display: flex; width: 100%; background: #2d2d3d; border-radius: 10px; overflow: hidden; margin-bottom: 15px; }
-        .tab { flex: 1; padding: 10px 2px; text-align: center; cursor: pointer; font-size: 0.8em; font-weight: bold; color: #8888a0; transition: 0.3s; }
+        .tab { flex: 1; padding: 10px 2px; text-align: center; cursor: pointer; font-size: 0.75em; font-weight: bold; color: #8888a0; transition: 0.3s; }
         .tab.active { background: #00bfff; color: white; }
 
-        .album-art { 
-            width: 100%; height: 250px; background: #252535; 
-            border-radius: 15px; margin-bottom: 15px; object-fit: cover;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
+        .album-art { width: 100%; height: 250px; background: #252535; border-radius: 15px; margin-bottom: 15px; object-fit: cover; box-shadow: 0 5px 15px rgba(0,0,0,0.5); }
         .song-title { font-size: 1.2em; font-weight: bold; color: #00bfff; margin-bottom: 5px; }
         .artist-name { font-size: 0.9em; color: #8888a0; margin-bottom: 15px; }
         
         .progress-container { display: flex; align-items: center; gap: 10px; font-size: 0.8em; color: #8888a0; margin-bottom: 15px; }
-        input[type="range"] { 
-            flex: 1; accent-color: #00bfff; height: 4px; background: #333; 
-            border-radius: 5px; outline: none; cursor: pointer;
-        }
+        input[type="range"] { flex: 1; accent-color: #00bfff; height: 4px; background: #333; border-radius: 5px; outline: none; cursor: pointer; }
         
         .controls { display: flex; justify-content: center; align-items: center; gap: 20px; }
         .controls button { background: none; border: none; color: #00bfff; font-size: 25px; cursor: pointer; transition: 0.2s; }
@@ -53,11 +30,7 @@
         .list-container { display: none; width: 90%; max-width: 350px; text-align: left; }
         .list-container.active { display: block; }
         
-        .result-item {
-            background: #1a1a24; padding: 10px; border-radius: 10px; 
-            margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
-            cursor: pointer; border: 1px solid #2d2d3d; transition: 0.2s;
-        }
+        .result-item { background: #1a1a24; padding: 10px; border-radius: 10px; margin-bottom: 10px; display: flex; align-items: center; gap: 12px; cursor: pointer; border: 1px solid #2d2d3d; transition: 0.2s; }
         .result-item:hover { background: #252535; border-color: #00bfff; }
         .result-thumb { width: 50px; height: 50px; border-radius: 5px; object-fit: cover; }
         .result-info { display: flex; flex-direction: column; flex: 1; overflow: hidden; }
@@ -65,28 +38,29 @@
         .result-artist { font-size: 0.75em; color: #8888a0; }
         .source-badge { font-size: 0.6em; background: #333; padding: 2px 5px; border-radius: 3px; width: max-content; margin-top: 3px;}
         
-        .like-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 0 5px; color: #555; transition: 0.3s; }
-        .like-btn.liked { color: #ff0055; transform: scale(1.1); }
+        .icon-btn { background: none; border: none; font-size: 20px; cursor: pointer; padding: 0 5px; color: #555; transition: 0.3s; }
+        .icon-btn.liked { color: #ff0055; transform: scale(1.1); }
     </style>
 </head>
 <body>
 
     <div class="player-container">
         <div class="search-box">
-            <input type="text" id="searchInput" placeholder="Search a song or BGM...">
+            <input type="text" id="searchInput" placeholder="Search song...">
             <button onclick="searchAll()">Search</button>
         </div>
 
         <div class="tabs">
             <div class="tab active" id="tab-saavn" onclick="switchTab('saavn')">🎵 Saavn</div>
-            <div class="tab" id="tab-yt" onclick="switchTab('yt')">🎥 YouTube</div>
+            <div class="tab" id="tab-yt" onclick="switchTab('yt')">🎥 YT</div>
             <div class="tab" id="tab-fav" onclick="switchTab('fav'); loadFavorites();">❤️ Favs</div>
+            <div class="tab" id="tab-off" onclick="switchTab('off'); loadOffline();">💾 Offline</div>
         </div>
 
         <img src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=600&auto=format&fit=crop" id="cover" class="album-art">
         
-        <div class="song-title" id="title">CNMW Player</div>
-        <div class="artist-name" id="artist">Pick a song!</div>
+        <div class="song-title" id="title">CNMW Premium</div>
+        <div class="artist-name" id="artist">Search or Play!</div>
         
         <audio id="audio"></audio>
 
@@ -99,14 +73,15 @@
         <div class="controls">
             <button onclick="toggleLoop()" id="loopBtn" style="color: gray;">🔁</button>
             <button onclick="togglePlay()" id="playBtn">▶️</button>
-            <button onclick="downloadSong()" id="downBtn" title="Download">⬇️</button>
+            <button onclick="saveToApp()" id="downBtn" title="Save to App">💾</button>
         </div>
         <p id="statusMessage" style="color: #00bfff; font-size: 0.8em; margin-top: 10px;"></p>
     </div>
 
     <div class="list-container active" id="list-saavn"></div>
     <div class="list-container" id="list-yt"></div>
-    <div class="list-container" id="list-fav"></div> <!-- Favorites List -->
+    <div class="list-container" id="list-fav"></div>
+    <div class="list-container" id="list-off"></div>
 
     <script>
         const audio = document.getElementById('audio');
@@ -120,44 +95,33 @@
         const currentTimeEl = document.getElementById('currentTime');
         const totalTimeEl = document.getElementById('totalTime');
 
-        // 🔥 NEE SONTHA BACKEND URL 🔥
         const MY_SERVER_URL = "https://cnmw.onrender.com";
 
-        // PLAYLIST/FAVORITES LOGIC (Browser Memory)
         let favorites = JSON.parse(localStorage.getItem('cnmw_favs')) || [];
+        let offlineDb = JSON.parse(localStorage.getItem('cnmw_offline')) || [];
+        let currentTrack = null;
 
         function switchTab(platform) {
-            ['saavn', 'yt', 'fav'].forEach(p => {
+            ['saavn', 'yt', 'fav', 'off'].forEach(p => {
                 document.getElementById(`tab-${p}`).className = platform === p ? 'tab active' : 'tab';
                 document.getElementById(`list-${p}`).className = platform === p ? 'list-container active' : 'list-container';
             });
         }
 
-        function decodeHTML(html) {
-            const txt = document.createElement("textarea");
-            txt.innerHTML = html;
-            return txt.value;
-        }
-
-        function isFav(id) {
-            return favorites.some(song => song.id === id);
-        }
+        function isFav(id) { return favorites.some(song => song.id === id); }
 
         function searchAll() {
             const query = document.getElementById('searchInput').value;
             if(!query) return;
-
-            statusMsg.innerText = "Searching on CNMW Backend... 🚀";
+            statusMsg.innerText = "Searching... 🚀";
             switchTab('saavn');
             fetchSaavn(query);
             fetchYT(query);
         }
 
-        // --- FETCH SAAVN VIA BACKEND ---
         async function fetchSaavn(query) {
             const container = document.getElementById('list-saavn');
-            container.innerHTML = "<p style='text-align:center;'>Fetching HQ Music...</p>";
-            
+            container.innerHTML = "<p style='text-align:center;'>Fetching HQ...</p>";
             try {
                 const response = await fetch(`${MY_SERVER_URL}/api/saavn?q=${encodeURIComponent(query)}`);
                 const json = await response.json();
@@ -166,113 +130,90 @@
                 if (songs.length > 0) {
                     container.innerHTML = "";
                     songs.forEach(song => {
-                        let sTitle = decodeHTML(song.name || song.title || "Unknown");
-                        let sArtist = decodeHTML(song.primaryArtists || song.singers || "Unknown");
+                        let sTitle = song.name || song.title || "Unknown";
+                        let sArtist = song.primaryArtists || song.singers || "Unknown";
                         let sThumb = song.image ? (Array.isArray(song.image) ? song.image[song.image.length-1].link || song.image[song.image.length-1].url : song.image) : "https://via.placeholder.com/50";
                         let dl = song.downloadUrl || song.media_url;
                         let sUrl = dl ? (Array.isArray(dl) ? dl[dl.length-1].link || dl[dl.length-1].url : dl) : "";
                         let sId = song.id || sTitle;
 
                         if (!sUrl) return;
-
                         let heart = isFav(sId) ? '❤️' : '🤍';
                         let likedClass = isFav(sId) ? 'liked' : '';
 
                         const item = document.createElement('div');
                         item.className = 'result-item';
                         item.innerHTML = `
-                            <img src="${sThumb}" class="result-thumb" onclick="playAudio('${sUrl}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${sThumb}')">
-                            <div class="result-info" onclick="playAudio('${sUrl}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${sThumb}')">
+                            <img src="${sThumb}" class="result-thumb" onclick="playAudio('${sId}', '${sUrl}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${sThumb}')">
+                            <div class="result-info" onclick="playAudio('${sId}', '${sUrl}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${sThumb}')">
                                 <span class="result-title">${sTitle}</span>
                                 <span class="result-artist">${sArtist}</span>
-                                <span class="source-badge" style="color:#00ff88;">🎵 CNMW Secure</span>
+                                <span class="source-badge" style="color:#00ff88;">🎵 Saavn HQ</span>
                             </div>
-                            <button class="like-btn ${likedClass}" onclick="toggleLike(this, '${sId}', '${sUrl}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${sThumb}')">${heart}</button>
+                            <button class="icon-btn ${likedClass}" onclick="toggleLike(this, '${sId}', '${sUrl}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${sThumb}')">${heart}</button>
                         `;
                         container.appendChild(item);
                     });
-                    statusMsg.innerText = "Results arrived!";
-                } else {
-                    container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>No songs found.</p>";
-                }
-            } catch (err) {
-                container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>Error loading Saavn.</p>";
-            }
+                } else container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>No songs found.</p>";
+            } catch (err) { container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>Error loading.</p>"; }
         }
 
-        // --- FETCH YOUTUBE VIA BACKEND ---
         async function fetchYT(query) {
             const container = document.getElementById('list-yt');
-            container.innerHTML = "<p style='text-align:center;'>Bypassing ISP for YT...</p>";
-            
+            container.innerHTML = "<p style='text-align:center;'>Fetching YT...</p>";
             try {
                 const response = await fetch(`${MY_SERVER_URL}/api/yt?q=${encodeURIComponent(query)}`);
                 const data = await response.json();
                 
                 if (data.items && data.items.length > 0) {
                     container.innerHTML = "";
-                    const streams = data.items.filter(item => item.type === 'stream').slice(0, 15);
-                    
-                    streams.forEach(video => {
-                        const vidId = video.url.split('?v=')[1]; 
-                        const thumb = video.thumbnail || "https://via.placeholder.com/50";
-                        let sTitle = video.title;
-                        let sArtist = video.uploaderName;
-                        let sServer = data.server;
-
+                    data.items.slice(0, 15).forEach(video => {
+                        const vidId = video.videoId;
+                        const thumb = video.videoThumbnails ? video.videoThumbnails[0].url : "https://via.placeholder.com/50";
+                        const sServer = data.server;
                         let heart = isFav(vidId) ? '❤️' : '🤍';
                         let likedClass = isFav(vidId) ? 'liked' : '';
 
                         const item = document.createElement('div');
                         item.className = 'result-item';
                         item.innerHTML = `
-                            <img src="${thumb}" class="result-thumb" onclick="playYT('${vidId}', '${sServer}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${thumb}')">
-                            <div class="result-info" onclick="playYT('${vidId}', '${sServer}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${thumb}')">
-                                <span class="result-title">${sTitle}</span>
-                                <span class="result-artist">${sArtist}</span>
-                                <span class="source-badge" style="color:#ff4d4d;">🎥 YT Extractor</span>
+                            <img src="${thumb}" class="result-thumb" onclick="playYT('${vidId}', '${sServer}', '${video.title.replace(/'/g, "\\'")}', '${video.author.replace(/'/g, "\\'")}', '${thumb}')">
+                            <div class="result-info" onclick="playYT('${vidId}', '${sServer}', '${video.title.replace(/'/g, "\\'")}', '${video.author.replace(/'/g, "\\'")}', '${thumb}')">
+                                <span class="result-title">${video.title}</span>
+                                <span class="result-artist">${video.author}</span>
+                                <span class="source-badge" style="color:#ff4d4d;">🎥 YT Source</span>
                             </div>
-                            <button class="like-btn ${likedClass}" onclick="toggleLike(this, '${vidId}', 'YT:${sServer}', '${sTitle.replace(/'/g, "\\'")}', '${sArtist.replace(/'/g, "\\'")}', '${thumb}')">${heart}</button>
+                            <button class="icon-btn ${likedClass}" onclick="toggleLike(this, '${vidId}', 'YT:${sServer}', '${video.title.replace(/'/g, "\\'")}', '${video.author.replace(/'/g, "\\'")}', '${thumb}')">${heart}</button>
                         `;
                         container.appendChild(item);
                     });
                 }
-            } catch (err) {
-                container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>YouTube blocked.</p>";
-            }
+            } catch (err) { container.innerHTML = "<p style='color:#ff4d4d; text-align:center;'>YT Error.</p>"; }
         }
 
         // --- FAVORITES LOGIC ---
-        function toggleLike(btn, id, url, title, artist, thumb) {
+        function toggleLike(btn, id, url, sTitle, sArtist, thumb) {
             btn.classList.toggle('liked');
             if(btn.classList.contains('liked')) {
                 btn.innerText = '❤️';
-                favorites.push({ id, url, title, artist, thumb });
-                statusMsg.innerText = `Saved to Favs!`;
+                favorites.push({ id, url, title: sTitle, artist: sArtist, thumb });
             } else {
                 btn.innerText = '🤍';
                 favorites = favorites.filter(song => song.id !== id);
-                statusMsg.innerText = `Removed from Favs.`;
             }
             localStorage.setItem('cnmw_favs', JSON.stringify(favorites));
-            if(document.getElementById('tab-fav').classList.contains('active')) {
-                loadFavorites(); // Refresh list if currently looking at Favs
-            }
+            loadFavorites();
         }
 
         function loadFavorites() {
             const container = document.getElementById('list-fav');
             container.innerHTML = "";
-            if(favorites.length === 0) {
-                container.innerHTML = "<p style='text-align:center; color:gray; margin-top:20px;'>Your favorite songs will appear here.</p>";
-                return;
-            }
+            if(favorites.length === 0) return container.innerHTML = "<p style='text-align:center; color:gray;'>No Favs yet.</p>";
             
             favorites.forEach(song => {
                 const isYT = song.url.startsWith('YT:');
-                const onClickLogic = isYT 
-                    ? `playYT('${song.id}', '${song.url.replace('YT:','')}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')`
-                    : `playAudio('${song.url}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')`;
+                const onClickLogic = isYT ? `playYT('${song.id}', '${song.url.replace('YT:','')}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')`
+                                          : `playAudio('${song.id}', '${song.url}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')`;
 
                 const item = document.createElement('div');
                 item.className = 'result-item';
@@ -281,55 +222,85 @@
                     <div class="result-info" onclick="${onClickLogic}">
                         <span class="result-title">${song.title}</span>
                         <span class="result-artist">${song.artist}</span>
-                        <span class="source-badge" style="color:#ffcc00;">⭐ Saved</span>
                     </div>
-                    <button class="like-btn liked" onclick="toggleLike(this, '${song.id}', '${song.url}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')">❤️</button>
+                    <button class="icon-btn liked" onclick="toggleLike(this, '${song.id}', '${song.url}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')">❤️</button>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        // --- IN-APP OFFLINE DOWNLOADS (Cache API) ---
+        async function saveToApp() {
+            if(!currentTrack) return statusMsg.innerText = "Play a song first!";
+            if(currentTrack.url.startsWith('YT:')) return statusMsg.innerText = "YT saving coming soon! Only Saavn supported.";
+            
+            statusMsg.innerText = "Saving to App... ⏳";
+            try {
+                // Opening Browser's Secret Cache
+                const cache = await caches.open('cnmw-music-cache');
+                await cache.add(currentTrack.url); // Saves the actual MP3 Blob inside app
+                
+                // Save details to LocalStorage for the UI
+                if(!offlineDb.some(s => s.id === currentTrack.id)) {
+                    offlineDb.push(currentTrack);
+                    localStorage.setItem('cnmw_offline', JSON.stringify(offlineDb));
+                }
+                statusMsg.innerText = "Saved Offline! 💾 (Check Tab)";
+                loadOffline();
+            } catch(e) {
+                statusMsg.innerText = "Failed to save offline.";
+            }
+        }
+
+        function loadOffline() {
+            const container = document.getElementById('list-off');
+            container.innerHTML = "";
+            if(offlineDb.length === 0) return container.innerHTML = "<p style='text-align:center; color:gray;'>Click 💾 to save songs for offline playback.</p>";
+            
+            offlineDb.forEach(song => {
+                const item = document.createElement('div');
+                item.className = 'result-item';
+                item.innerHTML = `
+                    <img src="${song.thumb}" class="result-thumb" onclick="playAudio('${song.id}', '${song.url}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')">
+                    <div class="result-info" onclick="playAudio('${song.id}', '${song.url}', '${song.title.replace(/'/g, "\\'")}', '${song.artist.replace(/'/g, "\\'")}', '${song.thumb}')">
+                        <span class="result-title">${song.title}</span>
+                        <span class="result-artist">${song.artist}</span>
+                        <span class="source-badge" style="color:#ffcc00;">💾 Offline Ready</span>
+                    </div>
                 `;
                 container.appendChild(item);
             });
         }
 
         // --- PLAYER LOGIC ---
-        function playAudio(audioUrl, songTitle, songArtist, songThumb) {
-            updatePlayerUI(songTitle, songArtist, songThumb, "Playing Audio... 🎵");
+        function playAudio(id, audioUrl, sTitle, sArtist, sThumb) {
+            currentTrack = { id, url: audioUrl, title: sTitle, artist: sArtist, thumb: sThumb };
+            updateUI(sTitle, sArtist, sThumb, "Playing Audio... 🎵");
             audio.src = audioUrl;
             startAudio();
         }
 
-        async function playYT(videoId, serverUrl, songTitle, songArtist, songThumb) {
-            updatePlayerUI(songTitle, songArtist, songThumb, "Extracting from Backend... 🎧");
+        async function playYT(videoId, serverUrl, sTitle, sArtist, sThumb) {
+            currentTrack = { id: videoId, url: `YT:${serverUrl}`, title: sTitle, artist: sArtist, thumb: sThumb };
+            updateUI(sTitle, sArtist, sThumb, "Extracting... 🎧");
             try {
                 const response = await fetch(`${MY_SERVER_URL}/api/yt/stream?id=${videoId}&server=${encodeURIComponent(serverUrl)}`);
                 const data = await response.json();
-                
-                const audioStreams = data.audioStreams?.filter(a => a.format === 'M4A' || a.format === 'WEBM') || [];
+                const audioStreams = data.adaptiveFormats?.filter(a => a.type.includes('audio')) || [];
                 if (audioStreams.length > 0) {
                     audio.src = audioStreams[0].url;
                     statusMsg.innerText = "Playing YT Stream...";
                     startAudio();
-                } else {
-                    statusMsg.innerText = "No audio stream found.";
-                }
-            } catch (err) {
-                statusMsg.innerText = "Extraction failed.";
-            }
+                } else statusMsg.innerText = "No stream found.";
+            } catch (err) { statusMsg.innerText = "Extraction failed."; }
         }
 
-        function updatePlayerUI(songTitle, songArtist, songThumb, msg) {
-            title.innerText = songTitle;
-            artist.innerText = songArtist;
-            cover.src = songThumb;
-            statusMsg.innerText = msg;
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.metadata = new MediaMetadata({ title: songTitle, artist: songArtist, artwork: [{ src: songThumb, sizes: '512x512', type: 'image/jpeg' }]});
-                navigator.mediaSession.setActionHandler('play', () => { audio.play(); playBtn.innerText = "⏸"; });
-                navigator.mediaSession.setActionHandler('pause', () => { audio.pause(); playBtn.innerText = "▶️"; });
-            }
+        function updateUI(sTitle, sArtist, sThumb, msg) {
+            title.innerText = sTitle; artist.innerText = sArtist; cover.src = sThumb; statusMsg.innerText = msg;
         }
 
         function startAudio() {
-            audio.play().then(() => { playBtn.innerText = "⏸"; })
-            .catch(() => { playBtn.innerText = "▶️"; statusMsg.innerText = "Ready! Tap Play."; });
+            audio.play().then(() => { playBtn.innerText = "⏸"; }).catch(() => { playBtn.innerText = "▶️"; });
         }
 
         function togglePlay() {
@@ -344,33 +315,22 @@
             statusMsg.innerText = audio.loop ? "Loop Enabled" : "Loop Disabled";
         }
 
-        function downloadSong() {
-            if (!audio.src) return statusMsg.innerText = "Play a song first!";
-            window.open(audio.src, '_blank');
-        }
-
-        function formatTime(seconds) {
-            if(isNaN(seconds)) return "0:00";
-            const min = Math.floor(seconds / 60);
-            const sec = Math.floor(seconds % 60);
-            return `${min}:${sec < 10 ? '0' : ''}${sec}`;
-        }
-
         audio.addEventListener('timeupdate', () => {
             if (audio.duration) {
                 progressBar.value = (audio.currentTime / audio.duration) * 100;
-                currentTimeEl.innerText = formatTime(audio.currentTime);
-                totalTimeEl.innerText = formatTime(audio.duration);
+                let min = Math.floor(audio.currentTime / 60); let sec = Math.floor(audio.currentTime % 60);
+                currentTimeEl.innerText = `${min}:${sec < 10 ? '0' : ''}${sec}`;
+                
+                let tMin = Math.floor(audio.duration / 60); let tSec = Math.floor(audio.duration % 60);
+                if(!isNaN(tMin)) totalTimeEl.innerText = `${tMin}:${tSec < 10 ? '0' : ''}${tSec}`;
             }
         });
 
-        progressBar.addEventListener('input', () => {
-            if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration;
-        });
+        progressBar.addEventListener('input', () => { if (audio.duration) audio.currentTime = (progressBar.value / 100) * audio.duration; });
+        audio.addEventListener('ended', () => { if (!audio.loop) playBtn.innerText = "▶️"; });
 
-        audio.addEventListener('ended', () => {
-            if (!audio.loop) playBtn.innerText = "▶️";
-        });
+        // Load tabs on startup
+        loadFavorites(); loadOffline();
     </script>
 </body>
 </html>
