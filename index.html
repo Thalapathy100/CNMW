@@ -1,4 +1,4 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>CNMW Hybrid</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>CNMW Music</title>
 <style>
 body{background:url('https://images.unsplash.com/photo-1511527661048-7fe73d85e9a4?q=80&w=1080') center/cover fixed;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;margin:0;padding:20px 0;min-height:100vh;}
 .box{background:rgba(20,20,30,0.5);backdrop-filter:blur(15px);padding:25px;border-radius:20px;width:90%;max-width:350px;text-align:center;border:1px solid rgba(255,255,255,0.1);box-shadow:0 10px 40px #000;}
@@ -10,39 +10,89 @@ body{background:url('https://images.unsplash.com/photo-1511527661048-7fe73d85e9a
 .list{display:none;width:90%;max-width:350px;text-align:left;} .list.active{display:block;}
 .item{background:rgba(20,20,30,0.7);padding:10px;border-radius:10px;margin-bottom:10px;display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,0.1);} .item img{width:50px;height:50px;border-radius:5px;object-fit:cover;}
 .info{display:flex;flex-direction:column;flex:1;overflow:hidden;} .info span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-#modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,10,15,0.95);z-index:100;flex-direction:column;padding:20px;box-sizing:border-box;}
+#modal, #loginModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,10,15,0.95);z-index:100;flex-direction:column;padding:20px;box-sizing:border-box;align-items:center;justify-content:center;}
+#loginModal{display:flex;z-index:200;background:url('https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600') center/cover;backdrop-filter:blur(20px);}
+.auth-box{background:rgba(0,0,0,0.8);padding:30px;border-radius:20px;text-align:center;width:80%;border:1px solid #0bf;box-shadow:0 0 20px rgba(0,191,255,0.3);}
+.auth-box input{width:90%;margin-bottom:15px;} .auth-box button{width:100%;}
+.user-badge{font-size:12px;color:#0f8;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:5px;}
 </style></head><body>
+
+<!-- LOGIN SCREEN -->
+<div id="loginModal">
+    <div class="auth-box">
+        <h2 style="color:#0bf;margin-top:0;">CNMW Secure</h2>
+        <p style="color:#aaa;font-size:12px;">Sign in to your premium account</p>
+        <input id="uName" placeholder="Enter Username (e.g., Nikhil)">
+        <select id="uLang" style="width:98%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.1);color:#fff;margin-bottom:15px;">
+            <option value="Telugu" style="color:#000;">Telugu 🇮🇳</option><option value="Hindi" style="color:#000;">Hindi 🇮🇳</option><option value="English" style="color:#000;">English 🇺🇸</option>
+        </select>
+        <button onclick="login()">Enter App 🚀</button>
+    </div>
+</div>
 
 <div id="ytplayer" style="position:absolute;width:0;height:0;visibility:hidden;"></div>
 <script src="https://www.youtube.com/iframe_api"></script>
 
 <div class="box">
 <div id="modal"><button onclick="this.parentElement.style.display='none'" style="background:#f44;align-self:end;">X Close</button><h3 style="color:#0f8;">Lyrics</h3><div id="lyr" style="overflow-y:auto;color:#fff;white-space:pre-line;margin-top:15px;"></div></div>
-<div class="row"><input id="search" placeholder="Search..." onkeypress="if(event.key==='Enter')searchAll()"><button onclick="searchAll()">Search</button></div>
+
+<div class="user-badge" id="uBadge">👤 Welcome, Guest</div>
+
+<div class="row"><input id="search" placeholder="Search song or artist..." onkeypress="if(event.key==='Enter')searchAll()"><button onclick="searchAll()">Search</button></div>
 <div class="tabs"><div class="tab active" id="t-saavn" onclick="tab('saavn')">🎵 CNMW</div><div class="tab" id="t-yt" onclick="tab('yt')">🎥 YT</div><div class="tab" id="t-fav" onclick="tab('fav');ldFav();">❤️ Fav</div><div class="tab" id="t-off" onclick="tab('off');ldOff();">📥 Off</div><div class="tab" id="t-set" onclick="tab('set')">⚙️ Set</div></div>
 <img id="cover" class="art" src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600">
 <div class="vis" id="vis"><div class="bar"></div><div class="bar" style="animation-delay:0.1s"></div><div class="bar" style="animation-delay:0.2s"></div><div class="bar" style="animation-delay:0.3s"></div></div>
-<div id="title" style="font-weight:bold;color:#0bf;margin-bottom:5px;">CNMW Hybrid</div><div id="artist" style="font-size:14px;color:#ccc;margin-bottom:15px;">Pick a vibe!</div><audio id="audio"></audio>
+<div id="title" style="font-weight:bold;color:#0bf;margin-bottom:5px;">CNMW System</div><div id="artist" style="font-size:14px;color:#ccc;margin-bottom:15px;">Ready to vibe!</div><audio id="audio"></audio>
 <div class="row"><input type="range" id="prog" value="0" max="100" style="flex:1;"></div>
 <div class="ctrl"><button id="lp" onclick="lp()">🔁</button><button onclick="prev()">⏮️</button><button id="playBtn" onclick="pl()">▶️</button><button onclick="nxt()">⏭️</button><button onclick="sav()">📥</button><button onclick="lyr()">📜</button></div>
 <p id="msg" style="color:#0f8;font-size:12px;font-weight:bold;margin-top:10px;"></p></div>
+
 <div class="list active" id="l-saavn"></div><div class="list" id="l-yt"></div><div class="list" id="l-fav"></div><div class="list" id="l-off"></div>
-<div class="list" id="l-set"><div style="background:rgba(0,0,0,0.5);padding:15px;border-radius:10px;margin-bottom:10px;"><h3>🌌 Theme</h3><select onchange="chTheme(this.value)" style="width:100%;padding:10px;background:#000;color:#fff;"><option value="car">Night Drive 🏎️</option><option value="rain">Rainy Mountain ⛰️</option><option value="beach">Sunset Beach 🌅</option></select></div><button onclick="clr()" style="width:100%;background:#f44;padding:10px;border-radius:10px;font-weight:bold;">Reset App</button></div>
+<div class="list" id="l-set">
+    <div style="background:rgba(0,0,0,0.5);padding:15px;border-radius:10px;margin-bottom:10px;">
+        <h3>🌌 Theme</h3><select onchange="chTheme(this.value)" style="width:100%;padding:10px;background:#000;color:#fff;"><option value="car">Night Drive 🏎️</option><option value="rain">Rainy Mountain ⛰️</option><option value="beach">Sunset Beach 🌅</option></select>
+    </div>
+    <div style="background:rgba(0,0,0,0.5);padding:15px;border-radius:10px;margin-bottom:10px;">
+        <h3 style="color:#0bf;">👤 Account Info</h3>
+        <p style="font-size:12px;" id="accInfo"></p>
+        <button onclick="logout()" style="width:100%;background:rgba(255,0,0,0.5);">Logout</button>
+    </div>
+    <button onclick="clr()" style="width:100%;background:#f44;padding:10px;border-radius:10px;font-weight:bold;">Hard Reset App</button>
+</div>
 
 <script>
 const $=i=>document.getElementById(i),au=$('audio'),U="https://cnmw.onrender.com";
 let resS=[],resY=[],fav=JSON.parse(localStorage.getItem('f'))||[],off=JSON.parse(localStorage.getItem('o'))||[],q=[],qI=0,curYt=false,ytp,cur=null;
+
+// AUTH & LANGUAGE SYSTEM
+let user = localStorage.getItem('c_user');
+let lang = localStorage.getItem('c_lang') || 'Telugu';
+if(user){ $('loginModal').style.display='none'; $('uBadge').innerHTML=`👤 Welcome, ${user} | 🌍 ${lang}`; $('accInfo').innerText=`User: ${user}\nPref: ${lang}`; }
+function login(){
+    let n=$('uName').value; let l=$('uLang').value; if(!n)return alert("Enter username!");
+    localStorage.setItem('c_user',n); localStorage.setItem('c_lang',l);
+    $('loginModal').style.display='none'; user=n; lang=l; $('uBadge').innerHTML=`👤 Welcome, ${user} | 🌍 ${lang}`; $('accInfo').innerText=`User: ${user}\nPref: ${lang}`;
+}
+function logout(){ localStorage.removeItem('c_user'); location.reload(); }
+
 const thms={car:"https://images.unsplash.com/photo-1511527661048-7fe73d85e9a4?q=80&w=1080",rain:"https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=80&w=1080",beach:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1080"};
 function chTheme(v){document.body.style.backgroundImage=`url('${thms[v]}')`;localStorage.setItem('t',v);} let sTh=localStorage.getItem('t')||'car';chTheme(sTh);document.querySelector('select').value=sTh;
-function onYouTubeIframeAPIReady(){ytp=new YT.Player('ytplayer',{height:'0',width:'0',playerVars:{'autoplay':1,'controls':0},events:{'onStateChange':e=>{if(e.data===0&&!au.loop)nxt();}}});}
+function onYouTubeIframeAPIReady(){ytp=new YT.Player('ytplayer',{height:'0',width:'0',playerVars:{'autoplay':1,'controls':0,'playsinline':1},events:{'onStateChange':e=>{if(e.data===0&&!au.loop)nxt();}}});}
 function tab(p){['saavn','yt','fav','off','set'].forEach(t=>{$(`t-${t}`).className=p===t?'tab active':'tab';$(`l-${t}`).className=p===t?'list active':'list';});}
-function searchAll(){let v=$('search').value;if(!v)return;$('msg').innerText="Searching... 🚀";tab('saavn');fS(v);fY(v);}
+
+function searchAll(){
+    let v=$('search').value; if(!v)return; 
+    $('msg').innerText="Searching... 🚀"; tab('saavn'); 
+    // Magic: Adding language to search query implicitly so Saavn returns perfect results
+    let smartQuery = `${v} ${lang}`; 
+    fS(smartQuery); fY(v);
+}
 function setMS(t,a,th){if('mediaSession' in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:t,artist:a,artwork:[{src:th,sizes:'512x512'}]});navigator.mediaSession.setActionHandler('previoustrack',prev);navigator.mediaSession.setActionHandler('nexttrack',nxt);}}
 
 async function fS(v){try{let r=await fetch(`${U}/api/saavn?q=${v}`),j=await r.json(),s=j.data?.results||[];if(s.length){resS=[];$('l-saavn').innerHTML="";s.forEach((x,i)=>{let t=x.name||x.title,a=x.primaryArtists,th=x.image[2]?.link,u=x.downloadUrl?x.downloadUrl[x.downloadUrl.length-1].link:"";if(!u)return;resS.push({id:x.id,u,t,a,th});$('l-saavn').innerHTML+=`<div class="item"><img src="${th}" onclick="pq(${i},'s')"><div class="info" onclick="pq(${i},'s')"><span>${t}</span><span style="font-size:12px;color:#aaa;">${a}</span></div><button style="background:none;border:none;color:#f05;font-size:18px;" onclick="lk('${x.id}','${u}','${t.replace(/'/g,"")}','${a.replace(/'/g,"")}','${th}')">❤️</button></div>`;});$('msg').innerText="HQ Ready 🟢";}}catch(e){}}
 async function fY(v){try{let r=await fetch(`${U}/api/yt?q=${v}`),j=await r.json();if(j.items){resY=[];$('l-yt').innerHTML="";j.items.forEach((x,i)=>{resY.push({id:x.videoId,t:x.title,a:x.author,th:x.videoThumbnails[0].url});$('l-yt').innerHTML+=`<div class="item"><img src="${x.videoThumbnails[0].url}" onclick="py('${x.videoId}','${x.title.replace(/'/g,"")}','${x.videoThumbnails[0].url}',${i})"><div class="info" onclick="py('${x.videoId}','${x.title.replace(/'/g,"")}','${x.videoThumbnails[0].url}',${i})"><span>${x.title}</span><span style="font-size:12px;color:#0bf;">🎥 Official Player</span></div></div>`;});}}catch(e){}}
 
-function py(id,t,th,i){$('msg').innerText="Playing Official YT 🟢";$('title').innerText=t;$('artist').innerText="YouTube Server";$('cover').src=th;curYt=true;q=resY;qI=i;cur=q[i];au.pause();$('playBtn').innerText="⏸";$('vis').className="vis active";if(ytp){ytp.loadVideoById(id);ytp.playVideo();setMS(t,"YouTube Server",th);setInterval(()=>{if(ytp&&ytp.getDuration){$('prog').value=(ytp.getCurrentTime()/ytp.getDuration())*100;}},1000);}}
+function py(id,t,th,i){$('msg').innerText="Loading YT 🟢";$('title').innerText=t;$('artist').innerText="YouTube Server";$('cover').src=th;curYt=true;q=resY;qI=i;cur=q[i];au.pause();$('playBtn').innerText="⏸";$('vis').className="vis active";if(ytp){ytp.loadVideoById(id);ytp.playVideo();setMS(t,"YouTube Server",th);setInterval(()=>{if(ytp&&ytp.getDuration){$('prog').value=(ytp.getCurrentTime()/ytp.getDuration())*100;}},1000);}}
 function pq(i,c){let l=c==='s'?resS:c==='f'?fav:off;if(!l||!l[i])return;q=l;qI=i;let s=l[i];$('title').innerText=s.t;$('artist').innerText=s.a;$('cover').src=s.th;curYt=false;cur=s;if(ytp)ytp.pauseVideo();au.src=s.u;au.play();$('playBtn').innerText="⏸";$('vis').className="vis active";setMS(s.t,s.a,s.th);}
 function pl(){if(curYt){let s=ytp.getPlayerState();if(s===1){ytp.pauseVideo();$('playBtn').innerText="▶️";$('vis').className="vis";}else{ytp.playVideo();$('playBtn').innerText="⏸";$('vis').className="vis active";}}else{if(au.paused){au.play();$('playBtn').innerText="⏸";$('vis').className="vis active";}else{au.pause();$('playBtn').innerText="▶️";$('vis').className="vis";}}}
 function nxt(){if(qI<q.length-1){let nx=q[qI+1];if(curYt)py(nx.id,nx.t,nx.th,qI+1);else pq(qI+1,q===resS?'s':q===fav?'f':'o');}} function prev(){if(qI>0){let pr=q[qI-1];if(curYt)py(pr.id,pr.t,pr.th,qI-1);else pq(qI-1,q===resS?'s':q===fav?'f':'o');}}
