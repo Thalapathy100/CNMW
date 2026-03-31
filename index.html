@@ -1,16 +1,20 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>CNMW - Omega</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>CNMW - Unstoppable</title>
 <style>
 body{background:url('https://images.unsplash.com/photo-1511527661048-7fe73d85e9a4?q=80&w=1080') center/cover fixed;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;margin:0;padding:20px 0;min-height:100vh;}
-.box{background:rgba(20,20,30,0.5);backdrop-filter:blur(15px);-webkit-backdrop-filter:blur(15px);padding:25px;border-radius:20px;width:90%;max-width:350px;text-align:center;border:1px solid rgba(255,255,255,0.1);box-shadow:0 10px 40px #000;}
-.row{display:flex;gap:10px;margin-bottom:15px;} input{flex:1;padding:10px;border-radius:10px;border:none;background:rgba(0,0,0,0.5);color:#fff;outline:none;} button{padding:10px;border-radius:10px;border:none;background:#0bf;color:#fff;font-weight:bold;cursor:pointer;}
-.tabs{display:flex;width:100%;overflow-x:auto;background:rgba(0,0,0,0.5);border-radius:10px;margin-bottom:15px;} .tab{flex:1;padding:10px;text-align:center;font-size:12px;font-weight:bold;color:#aaa;cursor:pointer;white-space:nowrap;} .tab.active{background:#0bf;color:#fff;}
+.box{background:rgba(20,20,30,0.5);backdrop-filter:blur(15px);padding:25px;border-radius:20px;width:90%;max-width:350px;text-align:center;border:1px solid rgba(255,255,255,0.1);box-shadow:0 10px 40px #000;}
+.row{display:flex;gap:10px;margin-bottom:15px;} input{flex:1;padding:10px;border-radius:10px;border:none;background:rgba(0,0,0,0.5);color:#fff;} button{padding:10px;border-radius:10px;border:none;background:#0bf;color:#fff;font-weight:bold;cursor:pointer;}
+.tabs{display:flex;width:100%;overflow-x:auto;background:rgba(0,0,0,0.5);border-radius:10px;margin-bottom:15px;} .tab{flex:1;padding:10px;text-align:center;font-size:12px;font-weight:bold;color:#aaa;cursor:pointer;} .tab.active{background:#0bf;color:#fff;}
 .art{width:100%;height:250px;border-radius:15px;margin-bottom:10px;object-fit:cover;}
 .vis{display:flex;gap:6px;justify-content:center;align-items:flex-end;height:35px;margin-bottom:15px;opacity:0;} .vis.active{opacity:1;} .bar{width:6px;border-radius:3px;animation:b 0.5s infinite alternate;background:#0f8;} @keyframes b{from{transform:scaleY(0.3);}to{transform:scaleY(1);}}
 .ctrl{display:flex;justify-content:center;align-items:center;gap:15px;} .ctrl button{background:none;color:#fff;font-size:22px;} #playBtn{font-size:45px;color:#0bf;}
 .list{display:none;width:90%;max-width:350px;text-align:left;} .list.active{display:block;}
-.item{background:rgba(20,20,30,0.7);padding:10px;border-radius:10px;margin-bottom:10px;display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,0.1);} .item.active{border-color:#0f8;} .item img{width:50px;height:50px;border-radius:5px;}
+.item{background:rgba(20,20,30,0.7);padding:10px;border-radius:10px;margin-bottom:10px;display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,0.1);} .item img{width:50px;height:50px;border-radius:5px;}
 .info{display:flex;flex-direction:column;flex:1;overflow:hidden;} .info span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
 </style></head><body>
+<!-- HIDDEN YOUTUBE PLAYER -->
+<div id="ytplayer" style="position:absolute; width:0; height:0; visibility:hidden;"></div>
+<script src="https://www.youtube.com/iframe_api"></script>
+
 <div class="box">
 <div class="row"><input id="search" placeholder="Search..." onkeypress="if(event.key==='Enter')searchAll()"><button onclick="searchAll()">Search</button></div>
 <div class="tabs"><div class="tab active" onclick="tab('saavn')">🎵 Saavn</div><div class="tab" onclick="tab('yt')">🎥 YT</div><div class="tab" onclick="tab('fav');ldFav();">❤️ Fav</div><div class="tab" onclick="tab('set')">⚙️ Set</div></div>
@@ -18,23 +22,34 @@ body{background:url('https://images.unsplash.com/photo-1511527661048-7fe73d85e9a
 <div class="vis" id="vis"><div class="bar"></div><div class="bar" style="animation-delay:0.1s"></div><div class="bar" style="animation-delay:0.2s"></div><div class="bar" style="animation-delay:0.3s"></div></div>
 <div id="title" style="font-weight:bold;color:#0bf;margin-bottom:5px;">CNMW Premium</div><div id="artist" style="font-size:14px;color:#ccc;margin-bottom:15px;">Ready to play!</div><audio id="audio"></audio>
 <div class="row"><input type="range" id="prog" value="0" max="100" style="flex:1;"></div>
-<div class="ctrl"><button id="lp" onclick="lp()">🔁</button><button onclick="pl()">⏮️</button><button id="playBtn" onclick="pl()">▶️</button><button onclick="pl()">⏭️</button><button onclick="lyr()">📜</button></div>
+<div class="ctrl"><button onclick="nxt()">⏭️</button><button id="playBtn" onclick="pl()">▶️</button><button onclick="clr()" style="font-size:15px; color:#f44;">🗑️ Reset</button></div>
 <p id="msg" style="color:#0f8;font-size:12px;font-weight:bold;margin-top:10px;"></p></div>
-<div class="list active" id="l-saavn"></div><div class="list" id="l-yt"></div><div class="list" id="l-fav"></div>
-<div class="list" id="l-set"><button onclick="clr()" style="width:100%;background:#f44;padding:10px;border-radius:10px;">Reset App</button></div>
+<div class="list active" id="l-saavn"></div><div class="list" id="l-yt"></div><div class="list" id="l-fav"></div><div class="list" id="l-set"><p style="text-align:center;">App Data Safe 🟢</p></div>
+
 <script>
 const $=i=>document.getElementById(i),au=$('audio'),U="https://cnmw.onrender.com";
-let resS=[],resY=[],fav=JSON.parse(localStorage.getItem('f'))||[],q=[],qI=0,cur=null;
+let resS=[],resY=[],fav=JSON.parse(localStorage.getItem('f'))||[],curYt=false,ytp;
+function onYouTubeIframeAPIReady(){ytp=new YT.Player('ytplayer',{height:'0',width:'0',playerVars:{'autoplay':1,'controls':0}});}
 function tab(p){['saavn','yt','fav','set'].forEach(t=>{$(`l-${t}`).className=p===t?'list active':'list';});}
 function searchAll(){let v=$('search').value;if(!v)return;$('msg').innerText="Searching... 🚀";tab('saavn');fS(v);fY(v);}
-async function fS(v){try{let r=await fetch(`${U}/api/saavn?q=${v}`),j=await r.json(),s=j.data?.results||[];if(s.length){resS=[];$('l-saavn').innerHTML="";s.forEach((x,i)=>{let t=x.name||x.title,a=x.primaryArtists,th=x.image[2]?.link,u=x.downloadUrl?x.downloadUrl[x.downloadUrl.length-1].link:"";if(!u)return;resS.push({id:x.id,u,t,a,th});$('l-saavn').innerHTML+=`<div class="item"><img src="${th}" onclick="pq(${i},'s')"><div class="info" onclick="pq(${i},'s')"><span>${t}</span><span style="font-size:12px;color:#aaa;">${a}</span></div><button onclick="lk('${x.id}','${u}','${t}','${a}','${th}')">❤️</button></div>`;});$('msg').innerText="HQ Ready 🟢";}}catch(e){}}
-async function fY(v){try{let r=await fetch(`${U}/api/yt?q=${v}`),j=await r.json();if(j.items){resY=[];$('l-yt').innerHTML="";j.items.forEach((x,i)=>{resY.push({id:x.videoId,t:x.title,a:x.author,th:x.videoThumbnails[0].url});$('l-yt').innerHTML+=`<div class="item"><img src="${x.videoThumbnails[0].url}" onclick="py('${x.videoId}','${x.title}',${i})"><div class="info" onclick="py('${x.videoId}','${x.title}',${i})"><span>${x.title}</span><span style="font-size:12px;color:#aaa;">${x.author}</span></div></div>`;});}}catch(e){}}
-async function py(id,t,i){$('msg').innerText="Bypassing Security... 🎧";$('title').innerText=t;let s=[`https://pipedapi.kavin.rocks/streams/${id}`,`https://pipedapi.smnz.de/streams/${id}`];for(let n of s){try{let r=await fetch(n),d=await r.json(),u=d.audioStreams?.find(x=>x.mimeType.includes('mp4'))?.url;if(u){au.src=u;pl();$('msg').innerText="Success 🟢";return;}}catch(e){}}$('msg').innerText="Node Blocked. Retry.";}
-function pq(i,c){let l=c==='s'?resS:fav;q=l;qI=i;let s=l[i];$('title').innerText=s.t;$('artist').innerText=s.a;$('cover').src=s.th;au.src=s.u;pl();}
-function pl(){if(!au.src)return;if(au.paused){au.play();$('playBtn').innerText="⏸";$('vis').className="vis active";}else{au.pause();$('playBtn').innerText="▶️";$('vis').className="vis";}}
-function lp(){au.loop=!au.loop;$('lp').style.color=au.loop?"#0f8":"#fff";}
-au.ontimeupdate=()=>{$('prog').value=(au.currentTime/au.duration)*100;};
-function lk(i,u,t,a,th){fav.push({id:i,u,t,a,th});localStorage.setItem('f',JSON.stringify(fav));$('msg').innerText="Liked! ❤️";}
+async function fS(v){try{let r=await fetch(`${U}/api/saavn?q=${v}`),j=await r.json(),s=j.data?.results||[];if(s.length){resS=[];$('l-saavn').innerHTML="";s.forEach((x,i)=>{let t=x.name||x.title,a=x.primaryArtists,th=x.image[2]?.link,u=x.downloadUrl?x.downloadUrl[x.downloadUrl.length-1].link:"";if(!u)return;resS.push({id:x.id,u,t,a,th});$('l-saavn').innerHTML+=`<div class="item"><img src="${th}" onclick="pq(${i},'s')"><div class="info" onclick="pq(${i},'s')"><span>${t}</span><span style="font-size:12px;color:#aaa;">${a}</span></div><button style="background:none;border:none;color:#f05;" onclick="lk('${x.id}','${u}','${t.replace(/'/g,"")}','${a.replace(/'/g,"")}','${th}')">❤️</button></div>`;});$('msg').innerText="HQ Ready 🟢";}}catch(e){}}
+async function fY(v){try{let r=await fetch(`${U}/api/yt?q=${v}`),j=await r.json();if(j.items){resY=[];$('l-yt').innerHTML="";j.items.forEach((x,i)=>{resY.push({id:x.videoId,t:x.title,a:x.author,th:x.videoThumbnails[0].url});$('l-yt').innerHTML+=`<div class="item"><img src="${x.videoThumbnails[0].url}" onclick="py('${x.videoId}','${x.title.replace(/'/g,"")}','${x.videoThumbnails[0].url}')"><div class="info" onclick="py('${x.videoId}','${x.title.replace(/'/g,"")}','${x.videoThumbnails[0].url}')"><span>${x.title}</span><span style="font-size:12px;color:#0bf;">🎥 Official YT Stream</span></div></div>`;});}}catch(e){}}
+
+// THE UNBLOCKABLE YT PLAYER
+function py(id,t,th){
+    $('msg').innerText="Playing Official YT 🟢"; $('title').innerText=t; $('artist').innerText="YouTube Server"; $('cover').src=th;
+    curYt=true; au.pause(); $('playBtn').innerText="⏸"; $('vis').className="vis active";
+    if(ytp){ ytp.loadVideoById(id); ytp.playVideo(); }
+}
+function pq(i,c){
+    let l=c==='s'?resS:fav; let s=l[i]; $('title').innerText=s.t; $('artist').innerText=s.a; $('cover').src=s.th;
+    curYt=false; if(ytp)ytp.pauseVideo(); au.src=s.u; au.play(); $('playBtn').innerText="⏸"; $('vis').className="vis active";
+}
+function pl(){
+    if(curYt){ let s=ytp.getPlayerState(); if(s===1){ytp.pauseVideo();$('playBtn').innerText="▶️";$('vis').className="vis";}else{ytp.playVideo();$('playBtn').innerText="⏸";$('vis').className="vis active";} }
+    else{ if(au.paused){au.play();$('playBtn').innerText="⏸";$('vis').className="vis active";}else{au.pause();$('playBtn').innerText="▶️";$('vis').className="vis";} }
+}
+function lk(i,u,t,a,th){fav.push({id:i,u,t,a,th});localStorage.setItem('f',JSON.stringify(fav));$('msg').innerText="Liked! ❤️";ldFav();}
 function ldFav(){$('l-fav').innerHTML="";fav.forEach((s,i)=>{$('l-fav').innerHTML+=`<div class="item"><img src="${s.th}" onclick="pq(${i},'f')"><div class="info" onclick="pq(${i},'f')"><span>${s.t}</span></div></div>`;});}
-function clr(){localStorage.clear();location.reload();}
+function clr(){localStorage.clear();location.reload();} ldFav();
 </script></body></html>
