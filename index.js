@@ -10,7 +10,7 @@ app.get('/', (req, res) => {
     res.send('CNMW Boss-Mode Backend is LIVE! 🟢');
 });
 
-// --- 🎵 SAAVN ENGINE (STABLE) ---
+// --- 🎵 SAAVN ENGINE ---
 app.get('/api/saavn', async (req, res) => {
     const query = req.query.q;
     if (!query) return res.status(400).json({ error: "Query needed" });
@@ -22,7 +22,6 @@ app.get('/api/saavn', async (req, res) => {
 
     for (let api of APIs) {
         try {
-            // Strict 5-second timeout so app never hangs!
             const response = await axios.get(api, { headers: { 'User-Agent': 'Mozilla/5.0' }, timeout: 5000 });
             if (response.data && response.data.data) return res.json(response.data);
         } catch (error) { continue; }
@@ -30,7 +29,7 @@ app.get('/api/saavn', async (req, res) => {
     res.status(500).json({ error: "Saavn API blocked." });
 });
 
-// --- 🎥 YOUTUBE SEARCH ENGINE (STABLE) ---
+// --- 🎥 YOUTUBE SEARCH ENGINE ---
 app.get('/api/yt', async (req, res) => {
     const query = req.query.q;
     if (!query) return res.status(400).json({ error: "Query needed" });
@@ -49,22 +48,26 @@ app.get('/api/yt', async (req, res) => {
     }
 });
 
-// --- 🎥 YOUTUBE AUDIO EXTRACTOR (STABLE) ---
+// --- 🎥 YOUTUBE HYDRA EXTRACTOR (8 Backup Nodes) ---
 app.get('/api/yt/stream', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) return res.status(400).json({ error: "Video ID needed" });
     
-    // Rotating Nodes with Strict Timeouts
     const nodes = [
-        `https://pipedapi.kavin.rocks/streams/${videoId}`,
-        `https://invidious.nerdvpn.de/api/v1/videos/${videoId}`,
-        `https://api.piped.projectsegfau.lt/streams/${videoId}`
+        `https://pipedapi.smnz.de/streams/${videoId}`,
+        `https://vid.puffyan.us/api/v1/videos/${videoId}`,
+        `https://pipedapi.adminforge.de/streams/${videoId}`,
+        `https://inv.tux.pizza/api/v1/videos/${videoId}`,
+        `https://pipedapi.tokhmi.xyz/streams/${videoId}`,
+        `https://invidious.flokinet.to/api/v1/videos/${videoId}`,
+        `https://invidious.jing.rocks/api/v1/videos/${videoId}`,
+        `https://pipedapi.kavin.rocks/streams/${videoId}`
     ];
 
     for (let server of nodes) {
         try {
-            // 6-second timeout. If it's slow, jump to next server!
-            const response = await axios.get(server, { timeout: 6000 });
+            // Very fast 4-second timeout. If blocked, jumps immediately!
+            const response = await axios.get(server, { timeout: 4000 });
             let streamUrl = null;
 
             if (response.data.audioStreams) {
@@ -76,14 +79,13 @@ app.get('/api/yt/stream', async (req, res) => {
             }
 
             if (streamUrl) {
+                console.log(`Stream successful from: ${server}`);
                 return res.json({ adaptiveFormats: [{ type: "audio", url: streamUrl }] });
             }
         } catch (error) { 
-            continue; // Node failed, silently try the next one
+            continue; 
         }
     }
-    
-    // If all fail, tell the app immediately instead of hanging
     res.status(500).json({ error: "All YT extraction nodes blocked." });
 });
 
