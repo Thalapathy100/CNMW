@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CNMW - Glassmorphism Edition</title>
+    <title>CNMW - Ultimate Bypass</title>
     <style>
         body { background:url('https://images.unsplash.com/photo-1511527661048-7fe73d85e9a4?q=80&w=1080&auto=format&fit=crop') center/cover fixed; color:#fff; font-family:sans-serif; display:flex; flex-direction:column; align-items:center; margin:0; padding:20px 0; min-height:100vh; transition:background 0.5s ease; }
         .player-container { background:rgba(20,20,30,0.4); backdrop-filter:blur(15px); -webkit-backdrop-filter:blur(15px); padding:25px; border-radius:20px; box-shadow:0 10px 40px rgba(0,0,0,0.5); width:90%; max-width:350px; text-align:center; border:1px solid rgba(255,255,255,0.1); margin-bottom:20px;}
@@ -39,6 +39,7 @@
         <div class="settings-card"><h3>🗑️ Storage</h3><button onclick="clearAppCache()" style="width:100%; padding:10px; background:#ff4d4d; color:#fff; border:none; border-radius:5px; cursor:pointer; font-weight:bold;">Reset App Data</button></div>
     </div>
     <script>
+        window.onerror=function(m){console.error(m);return true;};
         const audio=document.getElementById('audio'),playBtn=document.getElementById('playBtn'),loopBtn=document.getElementById('loopBtn'),title=document.getElementById('title'),artist=document.getElementById('artist'),cover=document.getElementById('cover'),statusMsg=document.getElementById('statusMessage'),progressBar=document.getElementById('progressBar'),currentTimeEl=document.getElementById('currentTime'),totalTimeEl=document.getElementById('totalTime'),visualizer=document.getElementById('visualizer'),MY_SERVER_URL="https://cnmw.onrender.com";
         function getSafeDB(k){try{let d=JSON.parse(localStorage.getItem(k));return Array.isArray(d)?d:[];}catch(e){return [];}}
         let saavnResults=[],ytResults=[],favorites=getSafeDB('cnmw_favs'),offlineDb=getSafeDB('cnmw_offline'),currentQueue=[],currentIndex=0,currentTrack=null;
@@ -48,9 +49,40 @@
         function switchTab(p){['saavn','yt','fav','off','set'].forEach(t=>{document.getElementById(`tab-${t}`).className=p===t?'tab active':'tab';document.getElementById(`list-${t}`).className=p===t?'list-container active':'list-container';});}
         function isFav(id){return favorites.some(s=>s.id===id);}
         function searchAll(){let q=document.getElementById('searchInput').value;if(!q)return;statusMsg.innerText="Searching... 🚀";switchTab('saavn');fetchSaavn(q);fetchYT(q);}
+        
         async function fetchSaavn(q){ let c=document.getElementById('list-saavn');c.innerHTML="<p style='text-align:center;'>Fetching HQ...</p>"; try{let r=await fetch(`${MY_SERVER_URL}/api/saavn?q=${encodeURIComponent(q)}`),j=await r.json(),s=j.data?.results||j.data||j.results||[]; if(s.length>0){saavnResults=[];c.innerHTML="";s.forEach((x,i)=>{let t=String(x.name||x.title||"Unk"),a=String(x.primaryArtists||x.singers||"Unk"),th=x.image?(Array.isArray(x.image)?x.image[x.image.length-1].link||x.image[x.image.length-1].url:x.image):"https://via.placeholder.com/50",dl=x.downloadUrl||x.media_url,u=dl?(Array.isArray(dl)?dl[dl.length-1].link||dl[dl.length-1].url:dl):"",id=String(x.id||t);if(!u)return;saavnResults.push({id,url:u,title:t,artist:a,thumb:th});let ht=isFav(id)?'❤️':'🤍',lc=isFav(id)?'liked':'',st=t.replace(/'/g,"\\'").replace(/"/g,"&quot;"),sa=a.replace(/'/g,"\\'").replace(/"/g,"&quot;"); let d=document.createElement('div');d.className='result-item';d.id=`item-saavn-${i}`;d.innerHTML=`<img src="${th}" class="result-thumb" onclick="playFromQueue(${i},'saavn')"><div class="result-info" onclick="playFromQueue(${i},'saavn')"><span class="result-title">${t}</span><span class="result-artist">${a}</span></div><button class="icon-btn ${lc}" onclick="toggleLike(this,'${id}','${u}','${st}','${sa}','${th}')">${ht}</button>`;c.appendChild(d);});statusMsg.innerText="Ready!";}else c.innerHTML="<p style='color:#ff4d4d;text-align:center;'>No songs.</p>";}catch(e){c.innerHTML=`<p style='color:#ff4d4d;text-align:center;'>Fetch failed.</p>`;} }
-        async function fetchYT(q){ let c=document.getElementById('list-yt');c.innerHTML="<p style='text-align:center;'>Bypassing YT... 🎥</p>"; try{let r=await fetch(`${MY_SERVER_URL}/api/yt?q=${encodeURIComponent(q)}`),d=await r.json();if(d.items&&d.items.length>0){ytResults=[];c.innerHTML="";d.items.forEach((x,i)=>{ytResults.push({id:x.videoId,title:x.title,artist:x.author,thumb:x.videoThumbnails[0].url});let st=x.title.replace(/'/g,"\\'").replace(/"/g,"&quot;"),sa=x.author.replace(/'/g,"\\'").replace(/"/g,"&quot;");let d=document.createElement('div');d.className='result-item';d.id=`item-yt-${i}`;d.innerHTML=`<img src="${x.videoThumbnails[0].url}" class="result-thumb" onclick="playYT('${x.videoId}','${st}','${sa}','${x.videoThumbnails[0].url}',${i})"><div class="result-info" onclick="playYT('${x.videoId}','${st}','${sa}','${x.videoThumbnails[0].url}',${i})"><span class="result-title">${x.title}</span><span class="result-artist">${x.author}</span><span style="font-size:10px;color:#ff4d4d;background:rgba(0,0,0,0.5);padding:2px 5px;border-radius:3px;width:max-content;">🎥 YT Server</span></div>`;c.appendChild(d);});}else c.innerHTML="<p style='color:#ff4d4d;text-align:center;'>No YT videos.</p>";}catch(e){c.innerHTML="<p style='color:#ff4d4d;text-align:center;'>YT Error.</p>";} }
-        async function playYT(id,t,a,th,i){statusMsg.innerText="Extracting Audio (Official Core)... 🎧";currentTrack={id,url:"",title:t,artist:a,thumb:th,isYT:true};title.innerText=t;artist.innerText=a;cover.src=th;currentQueue=ytResults;currentIndex=i;document.querySelectorAll('.result-item').forEach(e=>e.classList.remove('playing-now'));if(document.getElementById(`item-yt-${i}`))document.getElementById(`item-yt-${i}`).classList.add('playing-now'); try{let r=await fetch(`${MY_SERVER_URL}/api/yt/stream?id=${id}`),d=await r.json();if(d.adaptiveFormats&&d.adaptiveFormats.length>0){audio.src=d.adaptiveFormats[0].url;startAudio();}else statusMsg.innerText="Stream blocked by YouTube.";}catch(e){statusMsg.innerText="Extraction error.";} }
+        
+        async function fetchYT(q){ let c=document.getElementById('list-yt');c.innerHTML="<p style='text-align:center;'>Bypassing YT... 🎥</p>"; try{let r=await fetch(`${MY_SERVER_URL}/api/yt?q=${encodeURIComponent(q)}`),d=await r.json();if(d.items&&d.items.length>0){ytResults=[];c.innerHTML="";d.items.forEach((x,i)=>{ytResults.push({id:x.videoId,title:x.title,artist:x.author,thumb:x.videoThumbnails[0].url});let st=x.title.replace(/'/g,"\\'").replace(/"/g,"&quot;"),sa=x.author.replace(/'/g,"\\'").replace(/"/g,"&quot;");let d=document.createElement('div');d.className='result-item';d.id=`item-yt-${i}`;d.innerHTML=`<img src="${x.videoThumbnails[0].url}" class="result-thumb" onclick="playYT('${x.videoId}','${st}','${sa}','${x.videoThumbnails[0].url}',${i})"><div class="result-info" onclick="playYT('${x.videoId}','${st}','${sa}','${x.videoThumbnails[0].url}',${i})"><span class="result-title">${x.title}</span><span class="result-artist">${x.author}</span><span style="font-size:10px;color:#00ff88;background:rgba(0,0,0,0.5);padding:2px 5px;border-radius:3px;width:max-content;">🎥 Direct Phone API</span></div>`;c.appendChild(d);});}else c.innerHTML="<p style='color:#ff4d4d;text-align:center;'>No YT videos.</p>";}catch(e){c.innerHTML="<p style='color:#ff4d4d;text-align:center;'>YT Error.</p>";} }
+        
+        // --- 🚨 THE CHECKMATE MOVE: CLIENT-SIDE YT EXTRACTION 🚨 ---
+        async function playYT(id,t,a,th,i){
+            statusMsg.innerText="Bypassing via Phone IP... 🎧";
+            currentTrack={id,url:"",title:t,artist:a,thumb:th,isYT:true};title.innerText=t;artist.innerText=a;cover.src=th;currentQueue=ytResults;currentIndex=i;
+            document.querySelectorAll('.result-item').forEach(e=>e.classList.remove('playing-now'));if(document.getElementById(`item-yt-${i}`))document.getElementById(`item-yt-${i}`).classList.add('playing-now');
+            
+            // List of servers that your PHONE hits directly, completely bypassing Render backend
+            const nodes = [
+                `https://pipedapi.kavin.rocks/streams/${id}`,
+                `https://pipedapi.smnz.de/streams/${id}`,
+                `https://api.piped.projectsegfau.lt/streams/${id}`,
+                `https://pipedapi.adminforge.de/streams/${id}`,
+                `https://pipedapi.tokhmi.xyz/streams/${id}`
+            ];
+            
+            let found = false;
+            for(let node of nodes){
+                try{
+                    let r = await fetch(node); let d = await r.json();
+                    let stream = d.audioStreams?.find(x => x.mimeType.includes('mp4') || x.mimeType.includes('webm'));
+                    if(stream && stream.url){
+                        audio.src = stream.url; startAudio(); found = true;
+                        statusMsg.innerText = "Direct Stream Successful 🟢"; break;
+                    }
+                } catch(e) { console.log("Node blocked by ISP, shifting..."); }
+            }
+            if(!found) statusMsg.innerText="Stream blocked. Refresh and try again.";
+        }
+
         function playFromQueue(i,ctx){let l=ctx==='saavn'?saavnResults:ctx==='fav'?favorites:offlineDb;if(!l||!l[i])return;currentQueue=l;currentIndex=i;let s=l[i];document.querySelectorAll('.result-item').forEach(e=>e.classList.remove('playing-now'));let el=document.getElementById(`item-${ctx}-${i}`);if(el)el.classList.add('playing-now');playAudio(s.id,s.url,s.title,s.artist,s.thumb);}
         function playNext(){if(currentTrack&&currentTrack.isYT)return statusMsg.innerText="Autoplay for YT soon!";if(currentIndex<currentQueue.length-1)playFromQueue(currentIndex+1,currentQueue===saavnResults?'saavn':currentQueue===favorites?'fav':'off');else statusMsg.innerText="Queue Ended 🛑";}
         function playPrev(){if(currentTrack&&currentTrack.isYT)return;if(currentIndex>0)playFromQueue(currentIndex-1,currentQueue===saavnResults?'saavn':currentQueue===favorites?'fav':'off');}
@@ -66,9 +98,4 @@
         function loadFavorites(){let c=document.getElementById('list-fav');c.innerHTML="";if(!favorites||!favorites.length)return;favorites.forEach((s,i)=>{let st=String(s.title).replace(/'/g,"\\'").replace(/"/g,"&quot;"),sa=String(s.artist).replace(/'/g,"\\'").replace(/"/g,"&quot;");let d=document.createElement('div');d.className='result-item';d.id=`item-fav-${i}`;d.innerHTML=`<img src="${s.thumb}" class="result-thumb" onclick="playFromQueue(${i},'fav')"><div class="result-info" onclick="playFromQueue(${i},'fav')"><span class="result-title">${s.title}</span><span class="result-artist">${s.artist}</span></div><button class="icon-btn liked" onclick="toggleLike(this,'${s.id}','${s.url}','${st}','${sa}','${s.thumb}')">❤️</button>`;c.appendChild(d);});}
         async function saveToApp(){if(!currentTrack)return;if(currentTrack.isYT)return statusMsg.innerText="Cannot offline YT videos.";statusMsg.innerText="Saving... ⏳";try{const c=await caches.open('cnmw-music-cache');await c.add(currentTrack.url);if(!offlineDb.some(s=>s.id===currentTrack.id)){offlineDb.push(currentTrack);localStorage.setItem('cnmw_offline',JSON.stringify(offlineDb));}statusMsg.innerText="Saved Offline! 📥";loadOffline();}catch(e){statusMsg.innerText="Failed to save.";}}
         function loadOffline(){let c=document.getElementById('list-off');c.innerHTML="";if(!offlineDb||!offlineDb.length)return;offlineDb.forEach((s,i)=>{let d=document.createElement('div');d.className='result-item';d.id=`item-off-${i}`;d.innerHTML=`<img src="${s.thumb}" class="result-thumb" onclick="playFromQueue(${i},'off')"><div class="result-info" onclick="playFromQueue(${i},'off')"><span class="result-title">${s.title}</span><span class="result-artist">${s.artist}</span></div><button class="icon-btn" onclick="removeOffline('${s.id}','${s.url}')" title="Delete" style="color:#ff4d4d;">🗑️</button>`;c.appendChild(d);});}
-        async function removeOffline(id,u){try{const c=await caches.open('cnmw-music-cache');await c.delete(u);offlineDb=offlineDb.filter(s=>s.id!==id);localStorage.setItem('cnmw_offline',JSON.stringify(offlineDb));statusMsg.innerText="Deleted 🗑️";loadOffline();}catch(e){console.error(e);}}
-        function clearAppCache(){if(confirm("Reset App? Deletes Favs & Downloads.")){localStorage.clear();caches.keys().then(k=>k.forEach(c=>caches.delete(c)));alert("Cleared! Restarting...");location.reload();}}
-        loadFavorites();loadOffline();
-    </script>
-</body>
-</html>
+        async function removeOffline(id,u){try{const c=await caches.open('cnmw-music-cache');await c.delete(u);offlineDb=offlineDb.filter(s=>s.id!==id);localStorage.setItem('cnmw_offline',JSON.stringify(offlineDb));statusMsg.innerText="Deleted 🗑️";loadOffline();}catch(
