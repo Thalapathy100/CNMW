@@ -2,13 +2,12 @@ const express = require('express');
 const cors = require('cors');
 const axios = require('axios');
 const ytSearch = require('yt-search');
-const ytdl = require('@distube/ytdl-core'); // THE OFFICIAL CORE 🛡️
 
 const app = express();
 app.use(cors());
 
 app.get('/', (req, res) => {
-    res.send('CNMW Official Core Backend is LIVE! 🟢');
+    res.send('CNMW Boss-Mode Backend is LIVE! 🟢');
 });
 
 // --- 🎵 SAAVN ENGINE ---
@@ -49,26 +48,46 @@ app.get('/api/yt', async (req, res) => {
     }
 });
 
-// --- 🎥 YOUTUBE OFFICIAL AUDIO EXTRACTOR ---
+// --- 🎥 THE BOSS MODE EXTRACTOR (Cobalt Protocol) ---
 app.get('/api/yt/stream', async (req, res) => {
     const videoId = req.query.id;
     if (!videoId) return res.status(400).json({ error: "Video ID needed" });
 
+    const ytUrl = `https://www.youtube.com/watch?v=${videoId}`;
+
+    // Weapon 1: Cobalt Decentralized Network
     try {
-        console.log(`Extracting official core link for: ${videoId}`);
-        // This is where we bypass using the core library natively
-        const info = await ytdl.getInfo(videoId);
-        const format = ytdl.chooseFormat(info.formats, { quality: 'highestaudio' });
-        
-        if (format && format.url) {
-            return res.json({ adaptiveFormats: [{ type: "audio", url: format.url }] });
-        } else {
-            throw new Error("Format not found");
+        const cobaltRes = await axios.post('https://api.cobalt.tools/api/json', {
+            url: ytUrl,
+            isAudioOnly: true
+        }, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            },
+            timeout: 8000
+        });
+
+        if (cobaltRes.data && cobaltRes.data.url) {
+            console.log("Boss Move: Cobalt Extracted Successfully!");
+            return res.json({ adaptiveFormats: [{ type: "audio", url: cobaltRes.data.url }] });
         }
-    } catch (error) {
-        console.error("Core extraction failed:", error.message);
-        res.status(500).json({ error: "YT blocked the Core Extractor." });
+    } catch (e) {
+        console.log("Cobalt blocked, shifting to fallback...");
     }
+
+    // Weapon 2: Public Proxy Aggregator
+    try {
+        const fallbackRes = await axios.get(`https://pax-yt-api.vercel.app/api/yt?url=${ytUrl}`, { timeout: 8000 });
+        if (fallbackRes.data && fallbackRes.data.audio) {
+            console.log("Fallback 1 Extracted Successfully!");
+            return res.json({ adaptiveFormats: [{ type: "audio", url: fallbackRes.data.audio }] });
+        }
+    } catch (e) {
+        console.log("Fallback 1 blocked...");
+    }
+
+    res.status(500).json({ error: "YouTube's $100B Firewall blocked this request." });
 });
 
 const PORT = process.env.PORT || 10000;
