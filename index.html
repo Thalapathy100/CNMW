@@ -1,136 +1,297 @@
-<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>CNMW Music</title>
+<!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>CNMW Premium Cloud</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+
 <style>
-body{background:url('https://images.unsplash.com/photo-1511527661048-7fe73d85e9a4?q=80&w=1080') center/cover fixed;color:#fff;font-family:sans-serif;display:flex;flex-direction:column;align-items:center;margin:0;padding:20px 0;min-height:100vh;}
-.box{background:rgba(20,20,30,0.5);backdrop-filter:blur(15px);padding:25px;border-radius:20px;width:90%;max-width:350px;text-align:center;border:1px solid rgba(255,255,255,0.1);box-shadow:0 10px 40px #000;}
-.row{display:flex;gap:10px;margin-bottom:15px;} input{flex:1;padding:10px;border-radius:10px;border:none;background:rgba(0,0,0,0.5);color:#fff;} button{padding:10px;border-radius:10px;border:none;background:#0bf;color:#fff;font-weight:bold;cursor:pointer;}
-.tabs{display:flex;width:100%;overflow-x:auto;background:rgba(0,0,0,0.5);border-radius:10px;margin-bottom:15px;} .tab{flex:1;padding:10px;text-align:center;font-size:12px;font-weight:bold;color:#aaa;cursor:pointer;} .tab.active{background:#0bf;color:#fff;}
-.art{width:100%;height:250px;border-radius:15px;margin-bottom:10px;object-fit:cover;box-shadow:0 5px 20px rgba(0,0,0,0.5);}
-.vis{display:flex;gap:6px;justify-content:center;align-items:flex-end;height:35px;margin-bottom:15px;opacity:0;} .vis.active{opacity:1;} .bar{width:6px;border-radius:3px;animation:b 0.5s infinite alternate;background:#0f8;} @keyframes b{from{transform:scaleY(0.3);}to{transform:scaleY(1);}}
-.ctrl{display:flex;justify-content:center;align-items:center;gap:15px;} .ctrl button{background:none;color:#fff;font-size:22px;padding:0;cursor:pointer;} #playBtn{font-size:45px;color:#0bf;}
-.list{display:none;width:90%;max-width:350px;text-align:left;} .list.active{display:block;}
-.item{background:rgba(20,20,30,0.7);padding:10px;border-radius:10px;margin-bottom:10px;display:flex;align-items:center;gap:12px;border:1px solid rgba(255,255,255,0.1);cursor:pointer;} .item img{width:50px;height:50px;border-radius:5px;object-fit:cover;}
-.info{display:flex;flex-direction:column;flex:1;overflow:hidden;} .info span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-#modal, #loginModal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(10,10,15,0.95);z-index:100;flex-direction:column;padding:20px;box-sizing:border-box;align-items:center;justify-content:center;}
-#loginModal{display:flex;z-index:200;background:url('https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600') center/cover;backdrop-filter:blur(20px);}
-.auth-box{background:rgba(0,0,0,0.8);padding:30px;border-radius:20px;text-align:center;width:80%;border:1px solid #0bf;box-shadow:0 0 20px rgba(0,191,255,0.3);}
-.auth-box input{width:90%;margin-bottom:15px;box-sizing:border-box;} .auth-box button{width:100%;}
-.user-badge{font-size:12px;color:#0f8;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:5px;background:rgba(0,0,0,0.5);padding:5px;border-radius:10px;}
+:root{--primary:#0bf;--bg:rgba(10,10,20,0.8);--glass:rgba(255,255,255,0.05);}
+body{background:#000 url('https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=1470') center/cover fixed;color:#fff;font-family:'Poppins',sans-serif;margin:0;padding:0;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;}
+.glass{background:var(--glass);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:25px;}
+.player-box{width:90%;max-width:380px;padding:25px;text-align:center;margin-top:20px;box-shadow:0 20px 50px rgba(0,0,0,0.8);}
+.search-bar{display:flex;gap:10px;width:90%;max-width:380px;margin-bottom:15px;}
+input{flex:1;padding:12px;border-radius:15px;border:none;background:rgba(0,0,0,0.4);color:#fff;outline:none;font-size:14px;margin-bottom:10px;}
+button{padding:10px 20px;border-radius:15px;border:none;background:var(--primary);color:#000;font-weight:600;cursor:pointer;transition:0.3s;}
+button:hover{transform:scale(1.05);box-shadow:0 0 15px var(--primary);}
+
+.tabs{display:flex;width:100%;background:rgba(0,0,0,0.6);position:sticky;top:0;z-index:50;padding:10px 0;justify-content:center;gap:10px;}
+.tab{padding:8px 15px;font-size:12px;font-weight:600;color:#888;cursor:pointer;border-radius:20px;}
+.tab.active{background:var(--primary);color:#000;}
+
+.art-container{position:relative;width:100%;height:280px;margin-bottom:15px;}
+.art{width:100%;height:100%;border-radius:20px;object-fit:cover;box-shadow:0 10px 30px rgba(0,0,0,0.5);}
+.visualizer{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);display:flex;gap:4px;align-items:flex-end;height:40px;}
+.bar{width:4px;background:var(--primary);border-radius:2px;animation:dance 0.5s infinite alternate;opacity:0;}
+.visualizer.active .bar{opacity:1;}
+@keyframes dance{from{height:10%;}to{height:100%;}}
+
+.list{width:90%;max-width:380px;margin-top:15px;display:none;}
+.list.active{display:block;}
+.song-item{display:flex;align-items:center;gap:15px;padding:12px;background:rgba(255,255,255,0.03);border-radius:15px;margin-bottom:10px;transition:0.3s;}
+.song-item:hover{background:rgba(255,255,255,0.08);}
+.song-item img{width:50px;height:50px;border-radius:10px;object-fit:cover;}
+.song-info{flex:1;overflow:hidden;}
+.song-info div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14px;}
+.controls{display:flex;justify-content:center;align-items:center;gap:20px;margin:15px 0;}
+.icon-btn{background:none;color:#fff;font-size:24px;padding:0;box-shadow:none;}
+#playBtn{font-size:50px;color:var(--primary);}
+
+/* Login Modal */
+#authModal{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:1000;align-items:center;justify-content:center;text-align:center;}
+.auth-card{padding:40px;width:80%;max-width:320px;border:1px solid var(--primary);}
+.user-badge{font-size:12px;color:var(--primary);margin-top:10px;}
 </style></head><body>
 
-<!-- LOGIN SCREEN -->
-<div id="loginModal">
-    <div class="auth-box">
-        <h2 style="color:#0bf;margin-top:0;">CNMW Secure</h2>
-        <p style="color:#aaa;font-size:12px;">Sign in to your premium account</p>
-        <input id="uName" placeholder="Enter Username (e.g., Nikhil)">
-        <select id="uLang" style="width:100%;padding:10px;border-radius:10px;border:none;background:rgba(255,255,255,0.1);color:#fff;margin-bottom:15px;">
-            <option value="Telugu" style="color:#000;">Telugu 🇮🇳</option>
-            <option value="Hindi" style="color:#000;">Hindi 🇮🇳</option>
-            <option value="English" style="color:#000;">English 🇺🇸</option>
-        </select>
-        <button onclick="login()">Enter App 🚀</button>
+<div id="authModal">
+    <div class="glass auth-card">
+        <h2 style="color:var(--primary);margin-top:0;">CNMW Cloud</h2>
+        <p style="font-size:12px;color:#aaa">Login to sync playlists forever</p>
+        <input id="uEmail" type="email" placeholder="Email (e.g. nikhil@cnmw.com)">
+        <input id="uPass" type="password" placeholder="Password (Min 6 chars)">
+        <button onclick="login()" style="width:100%;margin-top:10px;">Login / Register 🚀</button>
+        <p id="authMsg" style="font-size:11px;color:#f44;margin-top:10px;"></p>
     </div>
 </div>
 
-<div id="ytplayer" style="position:absolute;width:0;height:0;visibility:hidden;"></div>
+<div class="tabs">
+    <div class="tab active" id="t-home" onclick="tab('home')">🏠 Explore</div>
+    <div class="tab" id="t-lib" onclick="tab('lib')">❤️ Library</div>
+    <div class="tab" id="t-yt" onclick="tab('yt')">📺 YT</div>
+    <div class="tab" id="t-set" onclick="tab('set')">⚙️ Settings</div>
+</div>
+
+<div class="glass player-box">
+    <div class="art-container">
+        <img id="cover" class="art" src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600">
+        <div class="visualizer" id="viz">
+            <div class="bar" style="animation-delay:0s"></div>
+            <div class="bar" style="animation-delay:0.1s"></div>
+            <div class="bar" style="animation-delay:0.2s"></div>
+            <div class="bar" style="animation-delay:0.3s"></div>
+            <div class="bar" style="animation-delay:0.4s"></div>
+        </div>
+    </div>
+    <div id="title" style="font-weight:600;font-size:18px;">CNMW Cloud Engine</div>
+    <div id="artist" style="font-size:13px;color:#aaa;margin-bottom:10px;">Ready to vibe!</div>
+    
+    <div class="row"><input type="range" id="prog" value="0" max="100" style="width:100%;cursor:pointer;"></div>
+    
+    <div class="controls">
+        <button class="icon-btn" onclick="prev()">⏮</button>
+        <button class="icon-btn" id="playBtn" onclick="togglePlay()">▶</button>
+        <button class="icon-btn" onclick="next()">⏭</button>
+    </div>
+    <div id="msg" style="font-size:11px;color:var(--primary);margin-top:5px;">System Online 🟢</div>
+</div>
+
+<div class="search-bar" style="margin-top:20px;">
+    <input id="search" placeholder="Search songs, artists..." onkeypress="if(event.key==='Enter')search()">
+    <button onclick="search()">Search</button>
+</div>
+
+<div class="list active" id="l-home">
+    <h4 style="margin-left:10px;color:var(--primary);">Trending Now 🔥</h4>
+    <div id="trending-list"></div>
+</div>
+
+<div class="list" id="l-lib">
+    <h4 style="margin-left:10px;color:var(--primary);">Your Cloud Vault ❤️</h4>
+    <div id="fav-list"></div>
+</div>
+
+<div class="list" id="l-yt">
+    <h4 style="margin-left:10px;color:var(--primary);">YouTube Hits 🎥</h4>
+    <div id="yt-list"></div>
+</div>
+
+<div class="list" id="l-set">
+    <div class="glass" style="padding:20px;text-align:center;">
+        <h3 style="color:var(--primary);margin-top:0;">Account Status</h3>
+        <p id="userEmailTxt" style="font-size:14px;color:#aaa;">Not Logged In</p>
+        <button onclick="auth.signOut()" style="background:#f44;width:100%;">Logout</button>
+    </div>
+</div>
+
+<div id="yt-player-container" style="position:fixed;bottom:-100px;left:0;width:10px;height:10px;opacity:0.01;">
+    <div id="ytplayer"></div>
+</div>
+
+<audio id="audio"></audio>
 <script src="https://www.youtube.com/iframe_api"></script>
 
-<div class="box">
-<div id="modal"><button onclick="this.parentElement.style.display='none'" style="background:#f44;align-self:end;">X Close</button><h3 style="color:#0f8;">Lyrics</h3><div id="lyr" style="overflow-y:auto;color:#fff;white-space:pre-line;margin-top:15px;"></div></div>
-
-<div class="user-badge" id="uBadge">👤 Welcome, Guest</div>
-
-<div class="row"><input id="search" placeholder="Search song or artist..." onkeypress="if(event.key==='Enter')searchAll()"><button onclick="searchAll()">Search</button></div>
-<div class="tabs"><div class="tab active" id="t-saavn" onclick="tab('saavn')">🎵 CNMW</div><div class="tab" id="t-yt" onclick="tab('yt')">🎥 YT</div><div class="tab" id="t-fav" onclick="tab('fav');ldFav();">❤️ Fav</div><div class="tab" id="t-off" onclick="tab('off');ldOff();">📥 Off</div><div class="tab" id="t-set" onclick="tab('set')">⚙️ Set</div></div>
-<img id="cover" class="art" src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600">
-<div class="vis" id="vis"><div class="bar"></div><div class="bar" style="animation-delay:0.1s"></div><div class="bar" style="animation-delay:0.2s"></div><div class="bar" style="animation-delay:0.3s"></div></div>
-<div id="title" style="font-weight:bold;color:#0bf;margin-bottom:5px;">CNMW System</div><div id="artist" style="font-size:14px;color:#ccc;margin-bottom:15px;">Ready to vibe!</div><audio id="audio"></audio>
-<div class="row"><input type="range" id="prog" value="0" max="100" style="flex:1;"></div>
-<div class="ctrl"><button id="lp" onclick="lp()">🔁</button><button onclick="prev()">⏮️</button><button id="playBtn" onclick="pl()">▶️</button><button onclick="nxt()">⏭️</button><button onclick="sav()">📥</button><button onclick="lyr()">📜</button></div>
-<p id="msg" style="color:#0f8;font-size:12px;font-weight:bold;margin-top:10px;"></p></div>
-
-<div class="list active" id="l-saavn"></div><div class="list" id="l-yt"></div><div class="list" id="l-fav"></div><div class="list" id="l-off"></div>
-<div class="list" id="l-set">
-    <div style="background:rgba(0,0,0,0.5);padding:15px;border-radius:10px;margin-bottom:10px;">
-        <h3>🌌 Theme</h3><select onchange="chTheme(this.value)" style="width:100%;padding:10px;background:#000;color:#fff;"><option value="car">Night Drive 🏎️</option><option value="rain">Rainy Mountain ⛰️</option><option value="beach">Sunset Beach 🌅</option></select>
-    </div>
-    <div style="background:rgba(0,0,0,0.5);padding:15px;border-radius:10px;margin-bottom:10px;">
-        <h3 style="color:#0bf;">👤 Account Info</h3>
-        <p style="font-size:12px;color:#ccc;" id="accInfo"></p>
-        <button onclick="logout()" style="width:100%;background:rgba(255,0,0,0.5);margin-top:10px;">Logout</button>
-    </div>
-    <button onclick="clr()" style="width:100%;background:#f44;padding:10px;border-radius:10px;font-weight:bold;">Hard Reset App</button>
-</div>
-
 <script>
+// --- FIREBASE INITIALIZATION ---
+const firebaseConfig = {
+  apiKey: "AIzaSyCL7aE2BNu3l8gfq2Nyr7OlLLuJxdHukBA",
+  authDomain: "cnmw-f92cc.firebaseapp.com",
+  projectId: "cnmw-f92cc",
+  storageBucket: "cnmw-f92cc.firebasestorage.app",
+  messagingSenderId: "156891564934",
+  appId: "1:156891564934:web:332b5013fe9f53f2a4ba07"
+};
+firebase.initializeApp(firebaseConfig);
+const auth = firebase.auth();
+const db = firebase.firestore();
+
+// --- APP VARIABLES ---
 const $=i=>document.getElementById(i),au=$('audio'),U="https://cnmw.onrender.com";
-let resS=[],resY=[],fav=JSON.parse(localStorage.getItem('f'))||[],off=JSON.parse(localStorage.getItem('o'))||[],q=[],qI=0,curYt=false,ytp,cur=null;
+let queue=[], qIdx=0, isYt=false, ytp, curUser=null;
+let fav=[]; // Cloud array
 
-let user = localStorage.getItem('c_user');
-let lang = localStorage.getItem('c_lang') || 'Telugu';
-if(user){ 
-    $('loginModal').style.display='none'; 
-    $('uBadge').innerHTML=`👤 Welcome, ${user} | 🌍 ${lang}`; 
-    $('accInfo').innerText=`User: ${user}\nPref: ${lang}`; 
+// --- AUTHENTICATION LOGIC ---
+auth.onAuthStateChanged(user => {
+    if(user){
+        curUser = user;
+        $('authModal').style.display = 'none';
+        $('userEmailTxt').innerText = `User: ${user.email}`;
+        loadCloudFavs(); // Fetch data from Firebase!
+        loadTrending();
+    } else {
+        curUser = null;
+        fav = [];
+        $('fav-list').innerHTML = '';
+        $('authModal').style.display = 'flex';
+    }
+});
+
+async function login(){
+    const e=$('uEmail').value, p=$('uPass').value;
+    if(!e || !p) return $('authMsg').innerText = "Enter email and password!";
+    $('authMsg').innerText = "Authenticating... ⏳";
+    try {
+        await auth.signInWithEmailAndPassword(e, p);
+    } catch(err) {
+        // Smart Login: If user doesn't exist, create an account automatically!
+        if(err.code === 'auth/invalid-credential' || err.code === 'auth/user-not-found'){
+            try {
+                await auth.createUserWithEmailAndPassword(e, p);
+            } catch(e2){ $('authMsg').innerText = e2.message; }
+        } else {
+            $('authMsg').innerText = err.message;
+        }
+    }
 }
-function login(){
-    let n=$('uName').value; let l=$('uLang').value; if(!n)return alert("Enter username!");
-    localStorage.setItem('c_user',n); localStorage.setItem('c_lang',l);
-    $('loginModal').style.display='none'; user=n; lang=l; 
-    $('uBadge').innerHTML=`👤 Welcome, ${user} | 🌍 ${lang}`; 
-    $('accInfo').innerText=`User: ${user}\nPref: ${lang}`;
+
+// --- CLOUD DATABASE LOGIC (FIRESTORE) ---
+async function loadCloudFavs(){
+    try {
+        const doc = await db.collection('users').doc(curUser.uid).get();
+        if(doc.exists){
+            fav = doc.data().favorites || [];
+            renderFavs();
+        }
+    } catch(e){ console.error("Cloud DB Error:", e); }
 }
-function logout(){ localStorage.removeItem('c_user'); location.reload(); }
 
-const thms={car:"https://images.unsplash.com/photo-1511527661048-7fe73d85e9a4?q=80&w=1080",rain:"https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=80&w=1080",beach:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1080"};
-function chTheme(v){document.body.style.backgroundImage=`url('${thms[v]}')`;localStorage.setItem('t',v);} 
-let sTh=localStorage.getItem('t')||'car';chTheme(sTh);document.querySelector('#l-set select').value=sTh;
-
-function tab(p){['saavn','yt','fav','off','set'].forEach(t=>{$(`t-${t}`).className=p===t?'tab active':'tab';$(`l-${t}`).className=p===t?'list active':'list';});}
-
-function onYouTubeIframeAPIReady(){ytp=new YT.Player('ytplayer',{height:'0',width:'0',playerVars:{'autoplay':1,'controls':0,'playsinline':1},events:{'onStateChange':e=>{if(e.data===0&&!au.loop)nxt();}}});}
-function setMS(t,a,th){if('mediaSession' in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:t,artist:a,artwork:[{src:th,sizes:'512x512'}]});navigator.mediaSession.setActionHandler('previoustrack',prev);navigator.mediaSession.setActionHandler('nexttrack',nxt);}}
-
-function searchAll(){
-    let v=$('search').value; if(!v)return; 
-    $('msg').innerText="Searching... 🚀"; tab('saavn'); 
-    let smartQuery = `${v} ${lang}`; 
-    fS(smartQuery); fY(v);
-}
-async function fS(v){try{let r=await fetch(`${U}/api/saavn?q=${v}`),j=await r.json(),s=j.data?.results||[];if(s.length){resS=[];$('l-saavn').innerHTML="";s.forEach((x,i)=>{let t=x.name||x.title,a=x.primaryArtists,th=x.image[2]?.link,u=x.downloadUrl?x.downloadUrl[x.downloadUrl.length-1].link:"";if(!u)return;resS.push({id:x.id,u,t,a,th});$('l-saavn').innerHTML+=`<div class="item"><img src="${th}" onclick="pq(${i},'s')"><div class="info" onclick="pq(${i},'s')"><span>${t}</span><span style="font-size:12px;color:#aaa;">${a}</span></div><button style="background:none;border:none;color:#f05;font-size:18px;" onclick="lk('${x.id}','${u}','${t.replace(/'/g,"")}','${a.replace(/'/g,"")}','${th}'); event.stopPropagation();">❤️</button></div>`;});$('msg').innerText="HQ Ready 🟢";}}catch(e){$('msg').innerText="Error fetching songs";}}
-async function fY(v){try{let r=await fetch(`${U}/api/yt?q=${v}`),j=await r.json();if(j.items){resY=[];$('l-yt').innerHTML="";j.items.forEach((x,i)=>{resY.push({id:x.videoId,t:x.title,a:x.author,th:x.videoThumbnails[0].url});$('l-yt').innerHTML+=`<div class="item"><img src="${x.videoThumbnails[0].url}" onclick="py('${x.videoId}','${x.title.replace(/'/g,"")}','${x.videoThumbnails[0].url}',${i})"><div class="info" onclick="py('${x.videoId}','${x.title.replace(/'/g,"")}','${x.videoThumbnails[0].url}',${i})"><span>${x.title}</span><span style="font-size:12px;color:#0bf;">🎥 Official Player</span></div></div>`;});}}catch(e){}}
-
-function py(id,t,th,i){$('msg').innerText="Loading YT 🟢";$('title').innerText=t;$('artist').innerText="YouTube Server";$('cover').src=th;curYt=true;q=resY;qI=i;cur=q[i];au.pause();$('playBtn').innerText="⏸";$('vis').className="vis active";if(ytp){ytp.loadVideoById(id);ytp.playVideo();setMS(t,"YouTube Server",th);setInterval(()=>{if(ytp&&ytp.getDuration){$('prog').value=(ytp.getCurrentTime()/ytp.getDuration())*100;}},1000);}}
-
-// PURE HTML5 PLAYER (No AppInventor Bridge)
-function pq(i,c){
-    let l=c==='s'?resS:c==='f'?fav:off;if(!l||!l[i])return;
-    q=l;qI=i;let s=l[i];
-    $('title').innerText=s.t;$('artist').innerText=s.a;$('cover').src=s.th;
-    curYt=false;cur=s;
-    if(ytp)ytp.pauseVideo();
+async function toggleFav(sObj, e) {
+    if(e) e.stopPropagation(); // Stop song from playing when clicking heart
+    if(!curUser) return alert("Please login first!");
     
-    au.src=s.u; 
-    let p = au.play();
-    if(p !== undefined) {
-        p.catch(e => {
-            $('msg').innerText = "Tap Play ▶️ to start"; 
-        });
+    // Check if song is already in favorites
+    const exists = fav.find(x => x.id === sObj.id);
+    if(exists){
+        fav = fav.filter(x => x.id !== sObj.id);
+        $('msg').innerText = "Removed from Cloud 🗑️";
+    } else {
+        fav.push(sObj);
+        $('msg').innerText = "Saved to Cloud ❤️";
     }
     
-    $('playBtn').innerText="⏸";$('vis').className="vis active";
-    setMS(s.t,s.a,s.th);
+    renderFavs();
+    // Sync with Firebase Database
+    await db.collection('users').doc(curUser.uid).set({ favorites: fav }, { merge: true });
 }
 
-function pl(){if(curYt){let s=ytp.getPlayerState();if(s===1){ytp.pauseVideo();$('playBtn').innerText="▶️";$('vis').className="vis";}else{ytp.playVideo();$('playBtn').innerText="⏸";$('vis').className="vis active";}}else{if(au.paused){au.play();$('playBtn').innerText="⏸";$('vis').className="vis active";}else{au.pause();$('playBtn').innerText="▶️";$('vis').className="vis";}}}
-function nxt(){if(qI<q.length-1){let nx=q[qI+1];if(curYt)py(nx.id,nx.t,nx.th,qI+1);else pq(qI+1,q===resS?'s':q===fav?'f':'o');}} function prev(){if(qI>0){let pr=q[qI-1];if(curYt)py(pr.id,pr.t,pr.th,qI-1);else pq(qI-1,q===resS?'s':q===fav?'f':'o');}}
-function lp(){au.loop=!au.loop;$('lp').style.color=au.loop?"#0f8":"#fff";} au.onended=()=>{if(!au.loop)nxt();}; au.ontimeupdate=()=>{if(!curYt&&au.duration)$('prog').value=(au.currentTime/au.duration)*100;}; $('prog').oninput=()=>{if(curYt&&ytp){ytp.seekTo(($('prog').value/100)*ytp.getDuration(),true);}else if(au.duration)au.currentTime=($('prog').value/100)*au.duration;};
+function renderFavs(){
+    $('fav-list').innerHTML = fav.map((s,i) => `
+        <div class="song-item" onclick="playSongObject(${i}, 'f')">
+            <img src="${s.image}">
+            <div class="song-info"><div>${s.title}</div><div style="font-size:11px;color:#888;">${s.artist}</div></div>
+            <button onclick="toggleFav({id:'${s.id}'}, event)" style="background:none;color:#f44;font-size:18px;">🗑️</button>
+        </div>
+    `).join('');
+}
 
-function lk(i,u,t,a,th){fav.push({id:i,u,t,a,th});localStorage.setItem('f',JSON.stringify(fav));$('msg').innerText="Liked! ❤️";ldFav();} function ldFav(){$('l-fav').innerHTML="";fav.forEach((s,i)=>{$('l-fav').innerHTML+=`<div class="item"><img src="${s.th}" onclick="pq(${i},'f')"><div class="info" onclick="pq(${i},'f')"><span>${s.t}</span></div></div>`;});}
-async function sav(){if(!cur||curYt)return $('msg').innerText="Can't download YT";$('msg').innerText="Saving...";try{let c=await caches.open('c');await c.add(cur.u);if(!off.some(x=>x.id===cur.id)){off.push(cur);localStorage.setItem('o',JSON.stringify(off));}ldOff();$('msg').innerText="Saved 📥";}catch(e){$('msg').innerText="Save fail";}}
-function ldOff(){$('l-off').innerHTML="";off.forEach((s,i)=>{$('l-off').innerHTML+=`<div class="item"><img src="${s.th}" onclick="pq(${i},'o')"><div class="info" onclick="pq(${i},'o')"><span>${s.t}</span></div><button onclick="rmO('${s.id}','${s.u}'); event.stopPropagation();" style="background:none;border:none;color:#f44;font-size:20px;">🗑️</button></div>`;});}
-async function rmO(id,u){let c=await caches.open('c');await c.delete(u);off=off.filter(x=>x.id!==id);localStorage.setItem('o',JSON.stringify(off));ldOff();}
+// --- UI & PLAYER LOGIC ---
+function tab(t){ ['home','lib','yt','set'].forEach(k=>{$(`t-${k}`).className=k===t?'tab active':'tab';$(`l-${k}`).className=k===t?'list active':'list';}); }
 
-async function lyr(){if(!cur||curYt)return;$('modal').style.display='flex';$('lyr').innerText="Loading...";try{let r=await fetch(`https://saavn.me/lyrics?id=${cur.id}`),d=await r.json();$('lyr').innerHTML=d.data?.lyrics?.replace(/<br>/g,"\n")||"No lyrics";}catch(e){$('lyr').innerText="Error";}}
-function clr(){localStorage.clear();location.reload();} ldFav();ldOff();
+function onYouTubeIframeAPIReady(){
+    ytp=new YT.Player('ytplayer',{height:'10',width:'10',playerVars:{'autoplay':1,'controls':0,'playsinline':1},events:{'onStateChange':e=>{if(e.data===0)next();}}});
+}
+
+async function search(){
+    const v=$('search').value; if(!v)return;
+    $('msg').innerText="Hunting songs... 🚀";
+    try {
+        const r=await fetch(`${U}/api/saavn?q=${v}`),j=await r.json();
+        const ytR=await fetch(`${U}/api/yt?q=${v}`),ytJ=await ytR.json();
+        
+        // Normalize Saavn Data
+        const saavnData = (j.data?.results||[]).map(s => ({id: s.id, title: s.name, artist: s.primaryArtists, image: s.image[2]?.link, url: s.downloadUrl[s.downloadUrl.length-1]?.link, type: 's'}));
+        renderSongs(saavnData, 'trending-list');
+        
+        // Normalize YT Data
+        const ytData = (ytJ.items||[]).map(y => ({id: y.videoId, title: y.title, artist: 'YouTube Server', image: y.videoThumbnails[0]?.url, type: 'y'}));
+        renderSongs(ytData, 'yt-list');
+        
+        tab('home'); $('msg').innerText="HQ Ready 🟢";
+    } catch(e){ $('msg').innerText="Search failed!"; }
+}
+
+function renderSongs(data, divId){
+    $(divId).innerHTML=data.map((s,i)=>`
+        <div class="song-item" onclick="setQueueAndPlay(${i}, '${divId}')">
+            <img src="${s.image}">
+            <div class="song-info"><div>${s.title}</div><div style="font-size:11px;color:#888;">${s.artist}</div></div>
+            ${s.type==='s' ? `<button onclick='toggleFav(${JSON.stringify(s).replace(/'/g, "&apos;")}, event)' style="background:none;color:red;font-size:18px;">♥</button>` : ''}
+        </div>
+    `).join('');
+    // Store array temporarily in the div for queue management
+    $(divId).dataset.queue = JSON.stringify(data);
+}
+
+function setQueueAndPlay(idx, divId){
+    queue = JSON.parse($(divId).dataset.queue);
+    playSongObject(idx, 'q');
+}
+
+function playSongObject(idx, source){
+    qIdx = idx;
+    const s = source === 'f' ? fav[idx] : queue[idx];
+    if(!s) return;
+    
+    $('title').innerText = s.title; $('artist').innerText = s.artist; $('cover').src = s.image;
+    $('viz').className="visualizer active";
+    
+    if(s.type === 's'){
+        isYt=false; if(ytp)ytp.stopVideo();
+        au.src = s.url; au.play();
+    } else {
+        isYt=true; au.pause();
+        ytp.loadVideoById(s.id); ytp.playVideo();
+    }
+    $('playBtn').innerText="⏸";
+}
+
+function togglePlay(){
+    if(isYt){ ytp.getPlayerState()===1?ytp.pauseVideo():ytp.playVideo(); }
+    else{ au.paused?au.play():au.pause(); }
+    $('playBtn').innerText = (au.paused || (isYt && ytp.getPlayerState()!==1)) ? "▶" : "⏸";
+}
+
+function next(){ if(qIdx<queue.length-1) playSongObject(qIdx+1, 'q'); }
+function prev(){ if(qIdx>0) playSongObject(qIdx-1, 'q'); }
+
+au.onended=()=>next();
+au.ontimeupdate=()=>{$('prog').value=(au.currentTime/au.duration)*100;};
+$('prog').oninput=()=>{if(!isYt && au.duration) au.currentTime=($('prog').value/100)*au.duration;};
+window.addEventListener('error',()=>next(),true); // Unstoppable playback fix
+
+async function loadTrending(){
+    try {
+        const r=await fetch(`${U}/api/saavn?q=Telugu Mass Hit`),j=await r.json();
+        const saavnData = (j.data?.results||[]).map(s => ({id: s.id, title: s.name, artist: s.primaryArtists, image: s.image[2]?.link, url: s.downloadUrl[s.downloadUrl.length-1]?.link, type: 's'}));
+        renderSongs(saavnData, 'trending-list');
+    } catch(e){}
+}
 </script></body></html>
