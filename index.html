@@ -66,7 +66,6 @@ body{background:url('https://images.unsplash.com/photo-1511527661048-7fe73d85e9a
 const $=i=>document.getElementById(i),au=$('audio'),U="https://cnmw.onrender.com";
 let resS=[],resY=[],fav=JSON.parse(localStorage.getItem('f'))||[],off=JSON.parse(localStorage.getItem('o'))||[],q=[],qI=0,curYt=false,ytp,cur=null;
 
-// 1. AUTH & LANGUAGE SYSTEM
 let user = localStorage.getItem('c_user');
 let lang = localStorage.getItem('c_lang') || 'Telugu';
 if(user){ 
@@ -83,31 +82,27 @@ function login(){
 }
 function logout(){ localStorage.removeItem('c_user'); location.reload(); }
 
-// 2. THEMES & TABS
 const thms={car:"https://images.unsplash.com/photo-1511527661048-7fe73d85e9a4?q=80&w=1080",rain:"https://images.unsplash.com/photo-1515694346937-94d85e41e6f0?q=80&w=1080",beach:"https://images.unsplash.com/photo-1507525428034-b723cf961d3e?q=80&w=1080"};
 function chTheme(v){document.body.style.backgroundImage=`url('${thms[v]}')`;localStorage.setItem('t',v);} 
 let sTh=localStorage.getItem('t')||'car';chTheme(sTh);document.querySelector('#l-set select').value=sTh;
 
 function tab(p){['saavn','yt','fav','off','set'].forEach(t=>{$(`t-${t}`).className=p===t?'tab active':'tab';$(`l-${t}`).className=p===t?'list active':'list';});}
 
-// 3. YOUTUBE IFRAME (VIDEO OFF, AUDIO ON)
 function onYouTubeIframeAPIReady(){ytp=new YT.Player('ytplayer',{height:'0',width:'0',playerVars:{'autoplay':1,'controls':0,'playsinline':1},events:{'onStateChange':e=>{if(e.data===0&&!au.loop)nxt();}}});}
-
 function setMS(t,a,th){if('mediaSession' in navigator){navigator.mediaSession.metadata=new MediaMetadata({title:t,artist:a,artwork:[{src:th,sizes:'512x512'}]});navigator.mediaSession.setActionHandler('previoustrack',prev);navigator.mediaSession.setActionHandler('nexttrack',nxt);}}
 
-// 4. SEARCH & FETCH
 function searchAll(){
     let v=$('search').value; if(!v)return; 
     $('msg').innerText="Searching... 🚀"; tab('saavn'); 
-    let smartQuery = `${v} ${lang}`; // Automatically forces chosen language
+    let smartQuery = `${v} ${lang}`; 
     fS(smartQuery); fY(v);
 }
 async function fS(v){try{let r=await fetch(`${U}/api/saavn?q=${v}`),j=await r.json(),s=j.data?.results||[];if(s.length){resS=[];$('l-saavn').innerHTML="";s.forEach((x,i)=>{let t=x.name||x.title,a=x.primaryArtists,th=x.image[2]?.link,u=x.downloadUrl?x.downloadUrl[x.downloadUrl.length-1].link:"";if(!u)return;resS.push({id:x.id,u,t,a,th});$('l-saavn').innerHTML+=`<div class="item"><img src="${th}" onclick="pq(${i},'s')"><div class="info" onclick="pq(${i},'s')"><span>${t}</span><span style="font-size:12px;color:#aaa;">${a}</span></div><button style="background:none;border:none;color:#f05;font-size:18px;" onclick="lk('${x.id}','${u}','${t.replace(/'/g,"")}','${a.replace(/'/g,"")}','${th}'); event.stopPropagation();">❤️</button></div>`;});$('msg').innerText="HQ Ready 🟢";}}catch(e){$('msg').innerText="Error fetching songs";}}
 async function fY(v){try{let r=await fetch(`${U}/api/yt?q=${v}`),j=await r.json();if(j.items){resY=[];$('l-yt').innerHTML="";j.items.forEach((x,i)=>{resY.push({id:x.videoId,t:x.title,a:x.author,th:x.videoThumbnails[0].url});$('l-yt').innerHTML+=`<div class="item"><img src="${x.videoThumbnails[0].url}" onclick="py('${x.videoId}','${x.title.replace(/'/g,"")}','${x.videoThumbnails[0].url}',${i})"><div class="info" onclick="py('${x.videoId}','${x.title.replace(/'/g,"")}','${x.videoThumbnails[0].url}',${i})"><span>${x.title}</span><span style="font-size:12px;color:#0bf;">🎥 Official Player</span></div></div>`;});}}catch(e){}}
 
-// 5. THE NATIVE BRIDGE PLAY FUNCTION (BACKGROUND PLAY HACK)
 function py(id,t,th,i){$('msg').innerText="Loading YT 🟢";$('title').innerText=t;$('artist').innerText="YouTube Server";$('cover').src=th;curYt=true;q=resY;qI=i;cur=q[i];au.pause();$('playBtn').innerText="⏸";$('vis').className="vis active";if(ytp){ytp.loadVideoById(id);ytp.playVideo();setMS(t,"YouTube Server",th);setInterval(()=>{if(ytp&&ytp.getDuration){$('prog').value=(ytp.getCurrentTime()/ytp.getDuration())*100;}},1000);}}
 
+// PURE HTML5 PLAYER (No AppInventor Bridge)
 function pq(i,c){
     let l=c==='s'?resS:c==='f'?fav:off;if(!l||!l[i])return;
     q=l;qI=i;let s=l[i];
@@ -115,29 +110,27 @@ function pq(i,c){
     curYt=false;cur=s;
     if(ytp)ytp.pauseVideo();
     
-    // NATIVE BRIDGE: Sending audio URL to Android Kodular ExoPlayer!
-    if(window.AppInventor){
-        window.AppInventor.setWebViewString(s.u);
-    } else {
-        au.src=s.u; au.play(); // Fallback if tested on PC/Browser
+    au.src=s.u; 
+    let p = au.play();
+    if(p !== undefined) {
+        p.catch(e => {
+            $('msg').innerText = "Tap Play ▶️ to start"; 
+        });
     }
     
     $('playBtn').innerText="⏸";$('vis').className="vis active";
     setMS(s.t,s.a,s.th);
 }
 
-// 6. CONTROLS
 function pl(){if(curYt){let s=ytp.getPlayerState();if(s===1){ytp.pauseVideo();$('playBtn').innerText="▶️";$('vis').className="vis";}else{ytp.playVideo();$('playBtn').innerText="⏸";$('vis').className="vis active";}}else{if(au.paused){au.play();$('playBtn').innerText="⏸";$('vis').className="vis active";}else{au.pause();$('playBtn').innerText="▶️";$('vis').className="vis";}}}
 function nxt(){if(qI<q.length-1){let nx=q[qI+1];if(curYt)py(nx.id,nx.t,nx.th,qI+1);else pq(qI+1,q===resS?'s':q===fav?'f':'o');}} function prev(){if(qI>0){let pr=q[qI-1];if(curYt)py(pr.id,pr.t,pr.th,qI-1);else pq(qI-1,q===resS?'s':q===fav?'f':'o');}}
 function lp(){au.loop=!au.loop;$('lp').style.color=au.loop?"#0f8":"#fff";} au.onended=()=>{if(!au.loop)nxt();}; au.ontimeupdate=()=>{if(!curYt&&au.duration)$('prog').value=(au.currentTime/au.duration)*100;}; $('prog').oninput=()=>{if(curYt&&ytp){ytp.seekTo(($('prog').value/100)*ytp.getDuration(),true);}else if(au.duration)au.currentTime=($('prog').value/100)*au.duration;};
 
-// 7. OFFLINE & LIKES
 function lk(i,u,t,a,th){fav.push({id:i,u,t,a,th});localStorage.setItem('f',JSON.stringify(fav));$('msg').innerText="Liked! ❤️";ldFav();} function ldFav(){$('l-fav').innerHTML="";fav.forEach((s,i)=>{$('l-fav').innerHTML+=`<div class="item"><img src="${s.th}" onclick="pq(${i},'f')"><div class="info" onclick="pq(${i},'f')"><span>${s.t}</span></div></div>`;});}
 async function sav(){if(!cur||curYt)return $('msg').innerText="Can't download YT";$('msg').innerText="Saving...";try{let c=await caches.open('c');await c.add(cur.u);if(!off.some(x=>x.id===cur.id)){off.push(cur);localStorage.setItem('o',JSON.stringify(off));}ldOff();$('msg').innerText="Saved 📥";}catch(e){$('msg').innerText="Save fail";}}
 function ldOff(){$('l-off').innerHTML="";off.forEach((s,i)=>{$('l-off').innerHTML+=`<div class="item"><img src="${s.th}" onclick="pq(${i},'o')"><div class="info" onclick="pq(${i},'o')"><span>${s.t}</span></div><button onclick="rmO('${s.id}','${s.u}'); event.stopPropagation();" style="background:none;border:none;color:#f44;font-size:20px;">🗑️</button></div>`;});}
 async function rmO(id,u){let c=await caches.open('c');await c.delete(u);off=off.filter(x=>x.id!==id);localStorage.setItem('o',JSON.stringify(off));ldOff();}
 
-// 8. LYRICS
 async function lyr(){if(!cur||curYt)return;$('modal').style.display='flex';$('lyr').innerText="Loading...";try{let r=await fetch(`https://saavn.me/lyrics?id=${cur.id}`),d=await r.json();$('lyr').innerHTML=d.data?.lyrics?.replace(/<br>/g,"\n")||"No lyrics";}catch(e){$('lyr').innerText="Error";}}
 function clr(){localStorage.clear();location.reload();} ldFav();ldOff();
 </script></body></html>
