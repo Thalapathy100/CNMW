@@ -1,31 +1,20 @@
 <!DOCTYPE html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>CNMW Premium</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;800&display=swap" rel="stylesheet">
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
-
+<script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
 <style>
 :root{--primary:#0bf;--bg:#05050a;--glass:rgba(255,255,255,0.05);}
 body{margin:0;padding:0;display:flex;flex-direction:column;align-items:center;min-height:100vh;overflow-x:hidden;color:#fff;font-family:'Poppins',sans-serif;}
-/* Fixed Background Hack */
 .bg-fixed {position:fixed;top:0;left:0;width:100vw;height:100vh;background:var(--bg) url('https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1470') center/cover;z-index:-1;}
-
 ::-webkit-scrollbar{width:4px;} ::-webkit-scrollbar-thumb{background:var(--primary);border-radius:10px;}
 .glass{background:var(--glass);backdrop-filter:blur(25px);border:1px solid rgba(0,191,255,0.2);border-radius:25px;}
-
-/* Header & Tabs */
 .header{width:100%;background:rgba(0,0,0,0.8);position:sticky;top:0;z-index:100;border-bottom:1px solid rgba(0,191,255,0.2);padding-bottom:10px;}
 .tabs{display:flex;justify-content:space-evenly;padding:12px 0;}
 .tab{padding:8px 15px;font-size:13px;font-weight:600;color:#888;cursor:pointer;border-radius:15px;transition:0.3s;}
 .tab.active{background:var(--primary);color:#000;box-shadow:0 0 15px var(--primary);}
-
-/* Search at Top */
 .search-container{padding:0 15px;margin-bottom:5px;}
 .search-bar{display:flex;gap:8px;background:rgba(255,255,255,0.05);padding:5px;border-radius:18px;border:1px solid rgba(0,191,255,0.1);}
 .search-bar input{flex:1;background:none;border:none;padding:10px;color:#fff;outline:none;font-size:14px;}
 .search-bar button{background:var(--primary);border:none;padding:8px 18px;border-radius:14px;font-weight:800;cursor:pointer;}
-
-/* Player Box */
 .player-box{width:90%;max-width:400px;padding:25px;text-align:center;margin-top:15px;box-shadow:0 20px 50px rgba(0,0,0,0.9);position:relative;}
 .art-container{position:relative;width:100%;height:260px;margin-bottom:20px;border-radius:20px;overflow:hidden;border:1px solid rgba(0,191,255,0.2);}
 .art{width:100%;height:100%;object-fit:cover;transition:0.5s;}
@@ -33,61 +22,49 @@ body{margin:0;padding:0;display:flex;flex-direction:column;align-items:center;mi
 .bar{width:5px;background:var(--primary);border-radius:3px;animation:dance 0.5s infinite alternate;opacity:0;}
 .visualizer.active .bar{opacity:1;}
 @keyframes dance{from{height:10%;}to{height:100%;}}
-
 .controls{display:flex;justify-content:center;align-items:center;gap:30px;margin:15px 0;}
 .icon-btn{background:none;color:#fff;font-size:28px;border:none;cursor:pointer;transition:0.2s;}
 #playBtn{font-size:60px;color:var(--primary);filter:drop-shadow(0 0 10px var(--primary));}
 .sub-controls{display:flex;justify-content:center;gap:25px;margin-top:10px;}
 .sub-btn{background:none;border:none;color:#aaa;font-size:20px;cursor:pointer;transition:0.3s;}
 .sub-btn:hover, .sub-btn.active{color:var(--primary);transform:scale(1.1);}
-
-/* Lists */
 .list{width:90%;max-width:410px;display:none;padding-bottom:120px;}
 .list.active{display:block;}
 .sec-title{font-size:17px;font-weight:800;margin:20px 0 12px 5px;display:flex;align-items:center;gap:8px;color:var(--primary);}
 .h-scroll{display:flex;overflow-x:auto;gap:15px;padding-bottom:10px;scrollbar-width:none;}
 .h-card{min-width:130px;background:rgba(255,255,255,0.03);border-radius:18px;padding:10px;text-align:center;border:1px solid rgba(255,255,255,0.05);cursor:pointer;}
 .h-card img{width:100%;height:110px;border-radius:12px;object-fit:cover;margin-bottom:8px;}
-
 .song-item{display:flex;align-items:center;gap:15px;padding:12px;background:rgba(255,255,255,0.03);border-radius:18px;margin-bottom:10px;border:1px solid transparent;cursor:pointer;}
 .song-item:hover{background:rgba(0,191,255,0.05);border-color:var(--primary);}
 .song-item img{width:55px;height:55px;border-radius:12px;object-fit:cover;}
-
-/* Settings/Equalizer UI */
 .set-card{padding:20px;margin-bottom:15px;text-align:left;}
 .set-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;}
 select, .eq-slider{background:rgba(0,0,0,0.5);color:#fff;border:1px solid var(--primary);padding:8px;border-radius:10px;outline:none;}
 .eq-container{display:flex;justify-content:space-between;padding:10px 0;}
 .eq-col{display:flex;flex-direction:column;align-items:center;gap:5px;font-size:10px;}
 .eq-slider{-webkit-appearance:slider-vertical;width:10px;height:80px;}
-
-/* Modals */
 #authModal, #lyrModal{display:flex;position:fixed;inset:0;background:rgba(0,0,0,0.95);z-index:2000;align-items:center;justify-content:center;}
 #lyrModal{display:none;flex-direction:column;padding:30px;box-sizing:border-box;}
 .auth-card{padding:35px;width:80%;max-width:320px;text-align:center;}
 input[type=range]{-webkit-appearance:none;width:100%;background:rgba(255,255,255,0.1);height:4px;border-radius:5px;}
 input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;height:14px;background:var(--primary);border-radius:50%;cursor:pointer;}
 </style></head><body>
-
 <div class="bg-fixed" id="main-bg"></div>
-
 <div id="lyrModal">
     <div style="width:100%;max-width:400px;text-align:right;"><button onclick="$('lyrModal').style.display='none'" style="background:none;border:none;color:#f44;font-size:25px;cursor:pointer;">✖</button></div>
     <h2 style="color:var(--primary);margin-top:0;">Lyrics 📜</h2>
     <div id="lyrText" style="width:100%;max-width:400px;overflow-y:auto;text-align:center;font-size:15px;line-height:2;color:#ccc;padding-bottom:50px;max-height:60vh;"></div>
 </div>
-
 <div id="authModal">
     <div class="glass auth-card">
         <h1 style="color:var(--primary);margin:0;font-weight:800;">CNMW</h1>
         <p style="font-size:12px;color:#888;margin-bottom:20px;">Secure Cloud Login</p>
         <input id="uEmail" type="email" placeholder="Email" style="width:90%;padding:12px;border-radius:12px;border:none;background:rgba(0,0,0,0.5);color:#fff;margin-bottom:10px;">
         <input id="uPass" type="password" placeholder="Password" style="width:90%;padding:12px;border-radius:12px;border:none;background:rgba(0,0,0,0.5);color:#fff;margin-bottom:15px;">
-        <button onclick="login()" style="width:100%;background:var(--primary);padding:12px;border:none;border-radius:12px;font-weight:800;">ACCESS SYSTEM</button>
+        <button onclick="login()" style="width:100%;background:var(--primary);padding:12px;border:none;border-radius:12px;font-weight:800;color:#000;">ACCESS SYSTEM</button>
         <p id="authMsg" style="font-size:11px;color:#f44;margin-top:10px;"></p>
     </div>
 </div>
-
 <div class="header">
     <div class="tabs">
         <div class="tab active" id="t-cnmw" onclick="tab('cnmw')">🎵 CNMW</div>
@@ -102,7 +79,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
         </div>
     </div>
 </div>
-
 <div class="glass player-box">
     <div class="art-container">
         <img id="cover" class="art" src="https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?w=600">
@@ -120,7 +96,6 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
         <button class="icon-btn" id="playBtn" onclick="togglePlay()">▶</button>
         <button class="icon-btn" onclick="next()">⏭</button>
     </div>
-    
     <div class="sub-controls">
         <button class="sub-btn" id="lpBtn" onclick="toggleLoop()">🔁</button>
         <button class="sub-btn" onclick="fetchLyrics()">📜</button>
@@ -128,43 +103,19 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
     </div>
     <div id="msg" style="font-size:11px;color:#888;margin-top:10px;"></div>
 </div>
-
 <div class="list active" id="l-cnmw">
-    <div class="sec-title">History 🕒</div>
-    <div class="h-scroll" id="recent-list"></div>
-    <div class="sec-title">Hot Albums 💿</div>
-    <div class="h-scroll" id="album-list"></div>
-    <div class="sec-title">Trending 🔥</div>
-    <div id="trending-list"></div>
+    <div class="sec-title">History 🕒</div><div class="h-scroll" id="recent-list"></div>
+    <div class="sec-title">Hot Albums 💿</div><div class="h-scroll" id="album-list"></div>
+    <div class="sec-title">Trending 🔥</div><div id="trending-list"></div>
 </div>
-
-<div class="list" id="l-lib">
-    <div class="sec-title">Secured Vault ❤️</div>
-    <div id="fav-list"></div>
-</div>
-
-<div class="list" id="l-yt">
-    <div class="sec-title">YouTube Engine 🎥</div>
-    <div id="yt-list"></div>
-</div>
-
+<div class="list" id="l-lib"><div class="sec-title">Secured Vault ❤️</div><div id="fav-list"></div></div>
+<div class="list" id="l-yt"><div class="sec-title">YouTube Engine 🎥</div><div id="yt-list"></div></div>
 <div class="list" id="l-set">
     <div class="glass set-card">
         <div class="sec-title" style="margin-top:0;">Global Settings</div>
-        <div class="set-row">
-            <span>Language</span>
-            <select id="set-lang" onchange="updatePref()">
-                <option value="Telugu">Telugu 🇮🇳</option><option value="English">English 🇺🇸</option><option value="Hindi">Hindi 🇮🇳</option>
-            </select>
-        </div>
-        <div class="set-row">
-            <span>Theme</span>
-            <select id="set-theme" onchange="updatePref()">
-                <option value="dark">Deep Night 🌌</option><option value="neon">Neon Blue 💎</option><option value="blood">Vampire 🩸</option>
-            </select>
-        </div>
+        <div class="set-row"><span>Language</span><select id="set-lang" onchange="updatePref()"><option value="Telugu">Telugu 🇮🇳</option><option value="English">English 🇺🇸</option><option value="Hindi">Hindi 🇮🇳</option></select></div>
+        <div class="set-row"><span>Theme</span><select id="set-theme" onchange="updatePref()"><option value="dark">Deep Night 🌌</option><option value="neon">Neon Blue 💎</option><option value="blood">Vampire 🩸</option></select></div>
     </div>
-
     <div class="glass set-card">
         <div class="sec-title" style="margin-top:0;">Master Equalizer 🎚️</div>
         <div class="eq-container">
@@ -173,213 +124,108 @@ input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:14px;heigh
             <div class="eq-col"><input type="range" class="eq-slider" min="-10" max="10" value="2"><span>TREBLE</span></div>
             <div class="eq-col"><input type="range" class="eq-slider" min="-10" max="10" value="0"><span>3D</span></div>
         </div>
-        <button style="width:100%;background:none;color:var(--primary);border:1px solid var(--primary);font-size:11px;margin-top:10px;padding:8px;border-radius:10px;">Apply Sound Profile</button>
     </div>
-
     <div class="glass set-card" style="text-align:center;">
         <p id="userEmailTxt" style="font-size:13px;"></p>
-        <button onclick="auth.signOut()" style="width:100%;background:#f44;color:#fff;border:none;padding:10px;border-radius:10px;font-weight:bold;margin-top:10px;cursor:pointer;">DISCONNECT</button>
+        <button onclick="auth.signOut()" style="width:100%;background:#f44;color:#fff;border:none;padding:10px;border-radius:10px;font-weight:bold;cursor:pointer;">DISCONNECT</button>
     </div>
 </div>
-
-<div id="yt-player-container" style="position:fixed;bottom:-100px;left:0;width:10px;height:10px;opacity:0.01;"><div id="ytplayer"></div></div>
+<div id="yt-player-container" style="position:fixed;bottom:-100px;left:0;width:1px;height:1px;opacity:0.01;"><div id="ytplayer"></div></div>
 <audio id="audio" crossorigin="anonymous"></audio>
-
 <script src="https://www.youtube.com/iframe_api"></script>
 <script>
-// --- FIREBASE INITIALIZATION ---
-const firebaseConfig = {
-  apiKey: "AIzaSyCL7aE2BNu3l8gfq2Nyr7OlLLuJxdHukBA",
-  authDomain: "cnmw-f92cc.firebaseapp.com",
-  projectId: "cnmw-f92cc",
-  storageBucket: "cnmw-f92cc.firebasestorage.app",
-  messagingSenderId: "156891564934",
-  appId: "1:156891564934:web:332b5013fe9f53f2a4ba07"
-};
+const firebaseConfig = { apiKey: "AIzaSyCL7aE2BNu3l8gfq2Nyr7OlLLuJxdHukBA", authDomain: "cnmw-f92cc.firebaseapp.com", projectId: "cnmw-f92cc", storageBucket: "cnmw-f92cc.firebasestorage.app", messagingSenderId: "156891564934", appId: "1:156891564934:web:332b5013fe9f53f2a4ba07" };
 firebase.initializeApp(firebaseConfig);
 const auth = firebase.auth(); const db = firebase.firestore();
-
-// --- STATE ---
 const $=i=>document.getElementById(i), au=$('audio'), U="https://cnmw.onrender.com";
-let queue=[], qIdx=0, isYt=false, ytp, fav=[];
-let recents = JSON.parse(localStorage.getItem('cnmw_recents')) || [];
-
-// --- AUDIO SHIELD ---
+let queue=[], qIdx=0, isYt=false, ytp, fav=[], recents = JSON.parse(localStorage.getItem('cnmw_recents')) || [];
 au.onerror = () => { setTimeout(next, 1000); };
 au.onended = () => { if(!au.loop) next(); };
 
-// --- NEW FEATURES (Loop, Lyrics, DL) ---
-function toggleLoop(){
-    au.loop = !au.loop;
-    $('lpBtn').className = au.loop ? "sub-btn active" : "sub-btn";
-    $('msg').innerText = au.loop ? "Looping Enabled 🔁" : "Looping Disabled";
-}
-
+function toggleLoop(){ au.loop = !au.loop; $('lpBtn').className = au.loop ? "sub-btn active" : "sub-btn"; $('msg').innerText = au.loop ? "Looping Enabled 🔁" : "Looping Disabled"; }
 async function fetchLyrics(){
     if(isYt) return $('msg').innerText = "No Lyrics for YouTube 📺";
     const s = queue[qIdx]; if(!s) return;
-    $('lyrModal').style.display = 'flex';
-    $('lyrText').innerText = "Hacking into lyrics database... 📡";
-    try {
-        const r = await fetch(`https://saavn.me/lyrics?id=${s.id}`);
-        const j = await r.json();
-        $('lyrText').innerHTML = j.data?.lyrics?.replace(/<br>/g, '<br><br>') || "Instrumental / No Lyrics found.";
-    } catch(e) { $('lyrText').innerText = "Lyrics System Error ❌"; }
+    $('lyrModal').style.display = 'flex'; $('lyrText').innerText = "Hacking into lyrics database... 📡";
+    try { const r = await fetch(`https://saavn.me/lyrics?id=${s.id}`); const j = await r.json(); $('lyrText').innerHTML = j.data?.lyrics?.replace(/<br>/g, '<br><br>') || "Instrumental / No Lyrics found."; } catch(e) { $('lyrText').innerText = "Lyrics System Error ❌"; }
 }
-
 async function downloadSong(){
     if(isYt) return $('msg').innerText = "YT Download Blocked by Google 🚫";
-    const s = queue[qIdx]; if(!s) return;
-    $('msg').innerText = "Downloading Track... ⬇️";
-    try {
-        const r = await fetch(s.url);
-        const blob = await r.blob();
-        const a = document.createElement('a');
-        a.href = URL.createObjectURL(blob);
-        a.download = s.title + " - CNMW.mp3";
-        a.click();
-        $('msg').innerText = "Downloaded to Device ✅";
-    } catch(e) { $('msg').innerText = "Download Failed ❌"; }
+    const s = queue[qIdx]; if(!s) return; $('msg').innerText = "Downloading Track... ⬇️";
+    try { const r = await fetch(s.url); const blob = await r.blob(); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = s.title + " - CNMW.mp3"; a.click(); $('msg').innerText = "Downloaded to Device ✅"; } catch(e) { $('msg').innerText = "Download Failed ❌"; }
 }
 
-// --- AUTH & DATA ---
 auth.onAuthStateChanged(user => {
-    if(user){
-        $('authModal').style.display = 'none';
-        $('userEmailTxt').innerText = "Secured: " + user.email;
-        loadCloudFavs(); loadHomeData(); renderRecents();
-    } else { $('authModal').style.display = 'flex'; }
+    if(user){ $('authModal').style.display = 'none'; $('userEmailTxt').innerText = "Secured: " + user.email; loadCloudFavs(); loadHomeData(); renderRecents(); } 
+    else { $('authModal').style.display = 'flex'; }
 });
-
 async function login(){
     const e=$('uEmail').value, p=$('uPass').value;
     if(!e || !p) return; $('authMsg').innerText = "Vibing... ⏳";
     try { await auth.signInWithEmailAndPassword(e, p); } 
-    catch(err) {
-        try { await auth.createUserWithEmailAndPassword(e, p); } 
-        catch(e2){ $('authMsg').innerText = e2.message; }
-    }
+    catch(err) { try { await auth.createUserWithEmailAndPassword(e, p); } catch(e2){ $('authMsg').innerText = e2.message; } }
 }
-
-async function loadCloudFavs(){
-    const doc = await db.collection('users').doc(auth.currentUser.uid).get();
-    if(doc.exists){ fav = doc.data().favorites || []; renderFavs(); }
-}
-
+async function loadCloudFavs(){ const doc = await db.collection('users').doc(auth.currentUser.uid).get(); if(doc.exists){ fav = doc.data().favorites || []; renderFavs(); } }
 async function toggleFav(s, e) {
     if(e) e.stopPropagation();
     fav.find(x=>x.id===s.id) ? fav=fav.filter(x=>x.id!==s.id) : fav.push(s);
-    renderFavs();
-    await db.collection('users').doc(auth.currentUser.uid).set({favorites:fav}, {merge:true});
+    renderFavs(); await db.collection('users').doc(auth.currentUser.uid).set({favorites:fav}, {merge:true});
 }
 
-// --- UI LOGIC ---
 function tab(t){ ['cnmw','lib','yt','set'].forEach(k=>{$(`t-${k}`).className=k===t?'tab active':'tab';$(`l-${k}`).className=k===t?'list active':'list';}); }
-
 function renderSong(s, i, div){
-    return `<div class="song-item" onclick="setPlay(${i},'${div}')">
-        <img src="${s.image}">
-        <div style="flex:1;overflow:hidden;"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.title}</div><div style="font-size:11px;color:#aaa;">${s.artist}</div></div>
-        ${s.type==='s' ? `<button onclick='toggleFav(${JSON.stringify(s).replace(/'/g,"&apos;")},event)' style="background:none;color:var(--primary);font-size:20px;border:none;cursor:pointer;">♥</button>` : ''}
-    </div>`;
+    return `<div class="song-item" onclick="setPlay(${i},'${div}')"><img src="${s.image}"><div style="flex:1;overflow:hidden;"><div style="font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${s.title}</div><div style="font-size:11px;color:#aaa;">${s.artist}</div></div>${s.type==='s' ? `<button onclick='toggleFav(${JSON.stringify(s).replace(/'/g,"&apos;")},event)' style="background:none;color:var(--primary);font-size:20px;border:none;cursor:pointer;">♥</button>` : ''}</div>`;
 }
-
-function renderFavs(){
-    $('fav-list').innerHTML = fav.map((s,i)=>renderSong(s,i,'fav-list')).join('');
-    $('fav-list').dataset.q = JSON.stringify(fav);
-}
-
-function renderRecents(){
-    $('recent-list').innerHTML = recents.map((s,i)=>`<div class="h-card" onclick="setPlay(${i},'recent-list')"><img src="${s.image}"><div>${s.title}</div></div>`).join('');
-    $('recent-list').dataset.q = JSON.stringify(recents);
-}
+function renderFavs(){ $('fav-list').innerHTML = fav.map((s,i)=>renderSong(s,i,'fav-list')).join(''); $('fav-list').dataset.q = JSON.stringify(fav); }
+function renderRecents(){ $('recent-list').innerHTML = recents.map((s,i)=>`<div class="h-card" onclick="setPlay(${i},'recent-list')"><img src="${s.image}"><div>${s.title}</div></div>`).join(''); $('recent-list').dataset.q = JSON.stringify(recents); }
 
 async function search(){
-    const v=$('search').value; if(!v)return; 
-    $('search').placeholder = "Hunting... 📡";
+    const v=$('search').value; if(!v)return; $('search').placeholder = "Hunting... 📡";
     try {
-        const [sR, yR] = await Promise.all([
-            fetch(`${U}/api/saavn?q=${v} ${$('set-lang').value}`).then(r=>r.json()).catch(()=>({data:{results:[]}})), 
-            fetch(`${U}/api/yt?q=${v}`).then(r=>r.json()).catch(()=>({items:[]}))
-        ]);
-        
+        const [sR, yR] = await Promise.all([ fetch(`${U}/api/saavn?q=${v} ${$('set-lang').value}`).then(r=>r.json()).catch(()=>({data:{results:[]}})), fetch(`${U}/api/yt?q=${v}`).then(r=>r.json()).catch(()=>({items:[]})) ]);
         const sD = (sR.data?.results||[]).map(s=>({id:s.id,title:s.name,artist:s.primaryArtists,image:s.image[2].link,url:s.downloadUrl[s.downloadUrl.length-1].link,type:'s'}));
         const yD = (yR.items||[]).map(y=>({id:y.videoId,title:y.title,artist:'YouTube',image:y.videoThumbnails[0].url,type:'y'}));
-        
-        $('trending-list').innerHTML = sD.map((s,i)=>renderSong(s,i,'trending-list')).join('');
-        $('trending-list').dataset.q = JSON.stringify(sD);
-        $('yt-list').innerHTML = yD.map((y,i)=>renderSong(y,i,'yt-list')).join('');
-        $('yt-list').dataset.q = JSON.stringify(yD);
+        $('trending-list').innerHTML = sD.map((s,i)=>renderSong(s,i,'trending-list')).join(''); $('trending-list').dataset.q = JSON.stringify(sD);
+        $('yt-list').innerHTML = yD.map((y,i)=>renderSong(y,i,'yt-list')).join(''); $('yt-list').dataset.q = JSON.stringify(yD);
         tab('cnmw'); 
     } catch(e) {}
     $('search').placeholder = "Search Masterpiece...";
 }
-
 async function loadHomeData(){
     try {
         const r = await fetch(`${U}/api/saavn?q=Telugu Top Hits`).then(r=>r.json());
         const d = (r.data?.results||[]).map(s=>({id:s.id,title:s.name,artist:s.primaryArtists,image:s.image[2].link,url:s.downloadUrl[s.downloadUrl.length-1].link,type:'s'}));
-        $('trending-list').innerHTML = d.map((s,i)=>renderSong(s,i,'trending-list')).join('');
-        $('trending-list').dataset.q = JSON.stringify(d);
-        $('album-list').innerHTML = d.slice(0,6).map((s,i)=>`<div class="h-card" onclick="setPlay(${i},'album-list')"><img src="${s.image}"><div>${s.title}</div></div>`).join('');
-        $('album-list').dataset.q = JSON.stringify(d.slice(0,6));
+        $('trending-list').innerHTML = d.map((s,i)=>renderSong(s,i,'trending-list')).join(''); $('trending-list').dataset.q = JSON.stringify(d);
+        $('album-list').innerHTML = d.slice(0,6).map((s,i)=>`<div class="h-card" onclick="setPlay(${i},'album-list')"><img src="${s.image}"><div>${s.title}</div></div>`).join(''); $('album-list').dataset.q = JSON.stringify(d.slice(0,6));
     } catch(e) {}
 }
 
-// --- PLAYER ---
-function onYouTubeIframeAPIReady(){
-    ytp=new YT.Player('ytplayer',{height:'10',width:'10',playerVars:{'autoplay':1,'controls':0,'playsinline':1},events:{'onStateChange':e=>{if(e.data===0 && !au.loop)next();}}});
-}
-
+function onYouTubeIframeAPIReady(){ ytp=new YT.Player('ytplayer',{height:'10',width:'10',playerVars:{'autoplay':1,'controls':0,'playsinline':1},events:{'onStateChange':e=>{if(e.data===0 && !au.loop)next();}}}); }
 function setMediaSession(t, a, img) {
     if ('mediaSession' in navigator) {
         navigator.mediaSession.metadata = new MediaMetadata({ title: t, artist: a, artwork: [{ src: img, sizes: '512x512' }] });
-        navigator.mediaSession.setActionHandler('previoustrack', prev);
-        navigator.mediaSession.setActionHandler('nexttrack', next);
-        navigator.mediaSession.setActionHandler('play', togglePlay);
-        navigator.mediaSession.setActionHandler('pause', togglePlay);
+        navigator.mediaSession.setActionHandler('previoustrack', prev); navigator.mediaSession.setActionHandler('nexttrack', next);
+        navigator.mediaSession.setActionHandler('play', togglePlay); navigator.mediaSession.setActionHandler('pause', togglePlay);
     }
 }
-
 function setPlay(idx, divId){
     if(divId) { queue = JSON.parse($(divId).dataset.q); }
     qIdx = idx; const s = queue[qIdx]; if(!s) return;
-    
-    $('title').innerText = s.title; $('artist').innerText = s.artist; $('cover').src = s.image;
-    $('viz').className="visualizer active";
-    
-    if(s.type==='s'){
-        isYt=false; if(ytp && ytp.stopVideo) ytp.stopVideo();
-        au.src=s.url; au.play().catch(e=>{});
-    } else {
-        isYt=true; au.pause();
-        if(ytp && ytp.loadVideoById) { ytp.loadVideoById(s.id); ytp.playVideo(); }
-    }
-    $('playBtn').innerText="⏸";
-    setMediaSession(s.title, s.artist, s.image);
-    
-    recents = [s, ...recents.filter(x=>x.id!==s.id)].slice(0,10);
-    localStorage.setItem('cnmw_recents', JSON.stringify(recents));
-    renderRecents();
-    $('msg').innerText = "";
+    $('title').innerText = s.title; $('artist').innerText = s.artist; $('cover').src = s.image; $('viz').className="visualizer active";
+    if(s.type==='s'){ isYt=false; if(ytp && ytp.stopVideo) ytp.stopVideo(); au.src=s.url; au.play().catch(e=>{}); } 
+    else { isYt=true; au.pause(); if(ytp && ytp.loadVideoById) { ytp.loadVideoById(s.id); ytp.playVideo(); } }
+    $('playBtn').innerText="⏸"; setMediaSession(s.title, s.artist, s.image);
+    recents = [s, ...recents.filter(x=>x.id!==s.id)].slice(0,10); localStorage.setItem('cnmw_recents', JSON.stringify(recents)); renderRecents(); $('msg').innerText = "";
 }
-
-function togglePlay(){
-    if(isYt){ ytp.getPlayerState()===1?ytp.pauseVideo():ytp.playVideo(); }
-    else{ au.paused?au.play():au.pause(); }
-    $('playBtn').innerText = (au.paused || (isYt && ytp.getPlayerState()!==1)) ? "▶" : "⏸";
-}
-
+function togglePlay(){ if(isYt){ ytp.getPlayerState()===1?ytp.pauseVideo():ytp.playVideo(); } else{ au.paused?au.play():au.pause(); } $('playBtn').innerText = (au.paused || (isYt && ytp.getPlayerState()!==1)) ? "▶" : "⏸"; }
 function next(){ if(qIdx<queue.length-1) setPlay(qIdx+1); else if(queue.length>0) setPlay(0); }
 function prev(){ if(qIdx>0) setPlay(qIdx-1); }
 
 au.ontimeupdate=()=>{$('prog').value=(au.currentTime/au.duration)*100;};
 $('prog').oninput=()=>{if(!isYt) au.currentTime=($('prog').value/100)*au.duration;};
-
 function updatePref(){
     const t = $('set-theme').value;
-    const bg = t==='neon' ? 'linea
-            const bg = t==='neon' ? 'linear-gradient(rgba(0,0,0,0.8),rgba(0,191,255,0.2))' : t==='blood' ? 'linear-gradient(rgba(0,0,0,0.8),rgba(139,0,0,0.4))' : 'none';
+    const bg = t==='neon' ? 'linear-gradient(rgba(0,0,0,0.8),rgba(0,191,255,0.2))' : t==='blood' ? 'linear-gradient(rgba(0,0,0,0.8),rgba(139,0,0,0.4))' : 'none';
     $('main-bg').style.background = bg + " url('https://images.unsplash.com/photo-1614613535308-eb5fbd3d2c17?q=80&w=1470') center/cover";
 }
 </script></body></html>
